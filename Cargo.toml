@@ -1,0 +1,13 @@
+[package]
+name = "franzensfestegibsnet"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocket = {version = "0.5.0-rc.2", features = ["json"] }
+rocket_dyn_templates = { version = "0.1.0-rc.2", features = ["handlebars"] }
+rocket_sync_db_pools = { version = "0.1.0-rc.2", features = ["diesel_postgres_pool"] }
+serde = { version = "1.0", features = ["derive"] }
+handlebars = "4.3.1"
+diesel = { version = "2.1.0", features = ["postgres"] }
+diesel_migrations = "2.1.0"
