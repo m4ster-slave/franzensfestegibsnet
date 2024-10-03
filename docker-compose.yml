@@ -10,7 +10,7 @@ services:
       ROCKET_ADDRESS: 0.0.0.0
       ROCKET_PORT: 8000
     ports:
-      - "8000:8000"
+      - "9000:8000"
     networks:
       - backend
       - frontend
