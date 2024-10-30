@@ -1,0 +1,64 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.wiki-nav {
+  background: #f5f5f5;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+}
+
+.wiki-nav a {
+  color: #333;
+  text-decoration: none;
+  margin-right: 1rem;
+}
+
+.wiki-nav a:hover {
+  text-decoration: underline;
+}
+
+.wiki-container {
+  padding: 1rem;
+}
+
+.wiki-list {
+  margin-top: 2rem;
+}
+
+.wiki-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.wiki-item a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.wiki-item a:hover {
+  text-decoration: underline;
+}
+
+.wiki-page {
+  padding: 1rem;
+}
+
+.wiki-content {
+  line-height: 1.6;
+  color: #333;
+}
+
+.wiki-content h1,
+.wiki-content h2,
+.wiki-content h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.wiki-content p {
+  margin-bottom: 1rem;
+}

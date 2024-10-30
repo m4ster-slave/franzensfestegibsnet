@@ -11,3 +11,4 @@ serde = { version = "1.0", features = ["derive"] }
 handlebars = "4.3.1"
 diesel = { version = "2.1.0", features = ["postgres"] }
 diesel_migrations = "2.1.0"
+pulldown-cmark = "0.12.2"

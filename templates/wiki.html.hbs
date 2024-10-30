@@ -1,8 +1,18 @@
-{{#> layout title="Wiki"}}
-    {{#*inline "page_content"}}
-        <h1>Wiki</h1>
-        <p>This is the wiki section. Add your articles and educational content here.</p>
-        <!-- Add a list or grid of wiki articles -->
-    {{/inline}}
-{{/layout}}
+{{#> header }}
+<link rel="stylesheet" href="/public/css/wiki_style.css">
+{{/header}}
 
+{{#> layout title="Wiki"}}
+{{#*inline "page_content"}}
+<div class="wiki-container">
+  <h1>Wiki</h1>
+  <div class="wiki-list">
+    {{#each md_files }}
+    <div class="wiki-item">
+      <a href="/wiki/{{this}}">{{this}}</a>
+    </div>
+    {{/each}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}

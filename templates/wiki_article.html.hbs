@@ -1,0 +1,14 @@
+{{#> header }}
+<link rel="stylesheet" href="/public/css/article_style.css">
+{{/header}}
+
+{{#> layout title="Wiki"}}
+{{#*inline "page_content"}}
+<a href="/wiki/" class="back-button">Back to Wiki</a>
+<div class="article-container">
+  <div class="article-content">
+    {{{content}}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}
