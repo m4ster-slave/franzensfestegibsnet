@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/public/css/style.css">
-    <title>{{title}} - Political Movement</title>
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/wiki">Wiki</a></li>
-                <li><a href="/forum">Forum</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        {{> page_content}}
-    </main>
-    <script>
-        // Basic JavaScript for interactivity
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Website loaded');
-        });
-    </script>
-</body>
-</html>
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/public/css/style.css">
+  <title>{{title}} - Political Movement</title>
+  {{> header}}
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/wiki">Wiki</a></li>
+        <li><a href="/forum">Forum</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    {{> page_content}}
+  </main>
+  <script>
+    // Basic JavaScript for interactivity
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Website loaded');
+    });
+  </script>
+</body>
+
+</html>

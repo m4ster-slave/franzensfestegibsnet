@@ -1,14 +1,46 @@
+{{#> header }}
+<link rel="stylesheet" href="/public/css/index_style.css">
+{{/header}}
+
 {{#> layout title="Home"}}
-    {{#*inline "page_content"}}
-        <h1>Welcome to Our Political Movement</h1>
-        <div class="container">
-            <h1>FRANZENSFESTE GIBS NET</h1>
-            <img src="/public/static/BIG_LIE.png" alt="ITS ALL A BIG LIE" class="main-image">
-            <p>This is an image showing the BIG LIE. Sometimes, things aren't always what they seem...</p>
-        </div>
+{{#*inline "page_content"}}
+<div class="header-section">
+  <h1>Welcome to Our Information Center</h1>
+</div>
 
-    {{/inline}}
+<div class="container">
+  <div class="main-content">
+    <h1>Understanding Facts and Information</h1>
+    <div class="image-section">
+      <img src="/public/static/BIG_LIE.png" alt="Information Visual" class="main-image">
+    </div>
 
+    <div class="content-description">
+      <p>Exploring the importance of verified information and factual analysis in today's world. Join us in our mission
+        to promote accurate knowledge and understanding.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h2>Resources</h2>
+        <img src="/public/static/resources.jpg" alt="Educational Resources" class="card-image">
+        <p>Discover educational materials and learning tools.</p>
+      </div>
+
+      <div class="info-card">
+        <h2>Community</h2>
+        <img src="/public/static/community.png" alt="Community Engagement" class="card-image">
+        <p>Connect with others who share an interest in factual information.</p>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <h2>Join Our Mission</h2>
+      <p>Be part of our community dedicated to promoting accurate information and understanding about whats going on in
+        Franzensfeste.</p>
+      <button class="cta-button">Learn More</button>
+    </div>
+  </div>
+</div>
+{{/inline}}
 {{/layout}}
-
-
