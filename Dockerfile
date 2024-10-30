@@ -27,6 +27,7 @@ COPY --from=builder /usr/local/cargo/bin/diesel /usr/local/bin/diesel
 # Copy other directories
 # COPY Rocket.prod.toml Rocket.toml
 COPY templates templates
+COPY articles articles 
 COPY public /usr/src/franzensfestegibsnet/public
 
 # Set the default command
