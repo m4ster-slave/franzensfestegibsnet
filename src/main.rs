@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+mod models;
 mod routes;
 
 use rocket::fs::{relative, FileServer, Options};
