@@ -1,41 +1,45 @@
 .article-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
+  background-color: #151520;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
   line-height: 1.6;
 }
 
 .back-button {
-  top: 20px;
-  left: 20px;
-  padding: 8px 16px;
-  background-color: #f0f0f0;
+  display: inline-block;
+  margin-bottom: 2rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #2a2a35;
   border-radius: 4px;
   text-decoration: none;
-  color: #333;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  color: #00ffff;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .back-button:hover {
-  background-color: #e0e0e0;
+  background-color: #00ffff;
+  color: #0a0a0f;
 }
 
-/* Style markdown content */
 .article-content {
-  color: #333;
+  color: #e0e0e0;
 }
 
 .article-content h1 {
   font-size: 2em;
   margin-bottom: 1em;
-  margin-top: 1em;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 }
 
 .article-content h2 {
   font-size: 1.5em;
   margin-bottom: 0.8em;
-  margin-top: 0.8em;
+  color: #00ffff;
 }
 
 .article-content p {
@@ -43,15 +47,18 @@
 }
 
 .article-content code {
-  background-color: #f5f5f5;
-  padding: 2px 4px;
+  background-color: #0a0a0f;
+  padding: 0.2em 0.4em;
   border-radius: 4px;
+  border: 1px solid #2a2a35;
+  font-family: "Tomorrow", monospace;
 }
 
 .article-content pre {
-  background-color: #f5f5f5;
+  background-color: #0a0a0f;
   padding: 1em;
   border-radius: 4px;
+  border: 1px solid #2a2a35;
   overflow-x: auto;
 }
 
@@ -59,10 +66,22 @@
   max-width: 100%;
   height: auto;
   margin: 1em 0;
+  border-radius: 8px;
+  border: 1px solid #2a2a35;
 }
 
 .article-content ul,
 .article-content ol {
-  margin-bottom: 1em;
+  margin: 1em 0;
   padding-left: 2em;
+}
+
+.article-content li {
+  margin-bottom: 0.5em;
+}
+
+@media (max-width: 768px) {
+  .article-container {
+    padding: 1rem;
+  }
 }
