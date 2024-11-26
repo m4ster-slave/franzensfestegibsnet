@@ -1,0 +1,41 @@
+{{!-- forum_post.html.hbs --}}
+{{#> layout title=post.title}}
+{{#*inline "page_content"}}
+<div class="post-container">
+    {{#if error}}
+        <div class="error-message">{{error}}</div>
+    {{/if}}
+    {{#if message}}
+        <div class="success-message">{{message}}</div>
+    {{/if}}
+
+    <div class="post-content">
+        <h1>{{post.title}}</h1>
+        <div class="post-meta">Posted on {{format_date post.created_at}}</div>
+        {{#if post.image_url}}
+        <div class="post-image">
+            <img src="{{post.image_url}}" alt="Post image">
+        </div>
+        {{/if}}
+        <div class="post-text">{{post.content}}</div>
+    </div>
+
+    <div class="comments-section">
+        <h2>Comments</h2>
+        <form action="/forum/{{post.id}}/comment" method="POST" class="comment-form">
+            <textarea name="content" required placeholder="Write your comment..."></textarea>
+            <button type="submit" class="btn">Add Comment</button>
+        </form>
+
+        <div class="comments-list">
+            {{#each comments}}
+            <div class="comment">
+                <div class="comment-content">{{this.content}}</div>
+                <div class="comment-meta">Posted on {{format_date this.created_at}}</div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+{{/inline}}
+{{/layout}}

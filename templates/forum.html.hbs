@@ -1,7 +1,26 @@
 {{#> layout title="Forum"}}
-    {{#*inline "page_content"}}
-        <h1>Forum</h1>
-        <p>This is the forum section. Implement your discussion threads and user interactions here.</p>
-    {{/inline}}
-{{/layout}}
+{{#*inline "page_content"}}
+<div class="forum-container">
+    {{#if error}}
+        <div class="error-message">{{error}}</div>
+    {{/if}}
+    {{#if message}}
+        <div class="success-message">{{message}}</div>
+    {{/if}}
 
+    <div class="create-post-button">
+        <a href="/forum/create" class="btn">Create New Post</a>
+    </div>
+
+    <div class="posts-list">
+        {{#each posts}}
+        <div class="post-card">
+            <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
+            <div class="post-meta">Posted on {{format_date this.created_at}}</div>
+            <div class="post-preview">{{truncate this.content 200}}</div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+{{/inline}}
+{{/layout}}

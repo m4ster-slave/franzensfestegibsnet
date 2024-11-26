@@ -1,19 +1,54 @@
-use crate::models;
+use crate::models::forum::*;
 use rocket::form::Form;
+use rocket::State;
 use rocket_dyn_templates::{context, Template};
+use sqlx::PgPool;
 
 #[get("/forum")]
-pub async fn forum() -> Template {
-    Template::render("forum", context! {})
+pub async fn forum(db: &State<PgPool>) -> Template {
+    match Post::get_all(db.inner()).await {
+        Ok(posts) => Template::render("forum", context! { posts: posts }),
+        Err(_) => Template::render("forum", context! { error: "Failed to load posts" }),
+    }
 }
 
-#[get("/forum/create")]
-pub async fn create_page() -> Template {
-    Template::render("forum_create", context! {})
+#[get("/forum/<id>")]
+pub async fn view_post(db: &State<PgPool>, id: i32) -> Template {
+    let post_result = Post::get_by_id(db.inner(), id).await;
+    let comments_result = Comment::get_by_post_id(db.inner(), id).await;
+
+    match (post_result, comments_result) {
+        (Ok(post), Ok(comments)) => {
+            Template::render("forum_post", context! { post: post, comments: comments })
+        }
+        _ => Template::render("forum", context! { error: "Failed to load post" }),
+    }
 }
 
 #[post("/forum/create", data = "<post>")]
-pub async fn create_post(post: Form<models::forum::CreatePost>) -> Template {
-    println!("title: \"{}\", content: \n{}\n", post.title, post.content);
+pub async fn create_post(db: &State<PgPool>, post: Form<CreatePost>) -> Template {
+    match Post::create(db.inner(), post.into_inner()).await {
+        Ok(_) => Template::render("forum", context! { message: "Post created successfully" }),
+        Err(_) => Template::render("forum", context! { error: "Failed to create post" }),
+    }
+}
+
+#[get("/forum/create")]
+pub async fn forum_create() -> Template {
     Template::render("forum_create", context! {})
+}
+
+#[post("/forum/<post_id>/comment", data = "<comment>")]
+pub async fn create_comment(
+    db: &State<PgPool>,
+    post_id: i32,
+    comment: Form<CreateComment>,
+) -> Template {
+    match Comment::create(db.inner(), post_id, comment.into_inner()).await {
+        Ok(_) => Template::render(
+            "forum_post",
+            context! { message: "Comment added successfully" },
+        ),
+        Err(_) => Template::render("forum_post", context! { error: "Failed to add comment" }),
+    }
 }

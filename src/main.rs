@@ -1,16 +1,32 @@
 #[macro_use]
 extern crate rocket;
 
+mod helpers;
 mod models;
 mod routes;
 
+use dotenv::dotenv;
 use rocket::fs::{relative, FileServer, Options};
 use rocket_dyn_templates::Template;
+use sqlx::PgPool;
+use std::env;
 
 #[launch]
 async fn rocket() -> _ {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    let pool = PgPool::connect(&database_url)
+        .await
+        .expect("Failed to connect to Postgres");
+
+    let template = Template::custom(|engines| {
+        helpers::register_helpers(&mut engines.handlebars);
+    });
+
     rocket::build()
-        .attach(Template::fairing())
+        .manage(pool)
+        .attach(template)
         .mount("/", routes::routes())
         .mount(
             "/public",
