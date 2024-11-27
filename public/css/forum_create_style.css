@@ -71,3 +71,48 @@
 .btn-primary:hover {
   transform: scale(1.02);
 }
+
+.btn-secondary {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: #6c757d;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  color: #fff;
+}
+
+input[type="url"] {
+  width: 100%;
+  padding: 1rem; /* Match the padding of other inputs */
+  background-color: #0a0a0f; /* Same as other inputs */
+  border: 1px solid #2a2a35; /* Match the border */
+  border-radius: 4px; /* Same as other inputs */
+  color: #e0e0e0; /* Match text color */
+  font-family: "Tomorrow", sans-serif;
+  font-size: 1rem;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s; /* Smooth transitions */
+}
+
+input[type="url"]:focus {
+  border-color: #00ffff; /* Same focus effect */
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); /* Same glow */
+}
+
+/* Center the "Back" button */
+.form-footer {
+  text-align: center; /* Center-align contents */
+  margin-top: 1.5rem; /* Add spacing */
+}
+
+.form-footer .btn-secondary {
+  display: inline-block; /* Keep the button inline */
+}

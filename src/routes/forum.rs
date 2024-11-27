@@ -1,5 +1,6 @@
 use crate::models::forum::*;
 use rocket::form::Form;
+use rocket::response::Redirect;
 use rocket::State;
 use rocket_dyn_templates::{context, Template};
 use sqlx::PgPool;
@@ -26,10 +27,15 @@ pub async fn view_post(db: &State<PgPool>, id: i32) -> Template {
 }
 
 #[post("/forum/create", data = "<post>")]
-pub async fn create_post(db: &State<PgPool>, post: Form<CreatePost>) -> Template {
+pub async fn create_post(db: &State<PgPool>, post: Form<CreatePost>) -> Result<Redirect, Template> {
     match Post::create(db.inner(), post.into_inner()).await {
-        Ok(_) => Template::render("forum", context! { message: "Post created successfully" }),
-        Err(_) => Template::render("forum", context! { error: "Failed to create post" }),
+        Ok(_) => Ok(Redirect::to(uri!(forum))),
+        Err(_) => Err(Template::render(
+            "forum_create",
+            context! {
+                error: "Failed to create post"
+            },
+        )),
     }
 }
 
@@ -43,12 +49,15 @@ pub async fn create_comment(
     db: &State<PgPool>,
     post_id: i32,
     comment: Form<CreateComment>,
-) -> Template {
+) -> Result<Redirect, Template> {
     match Comment::create(db.inner(), post_id, comment.into_inner()).await {
-        Ok(_) => Template::render(
+        Ok(_) => Ok(Redirect::to(uri!(view_post(post_id)))),
+        Err(_) => Err(Template::render(
             "forum_post",
-            context! { message: "Comment added successfully" },
-        ),
-        Err(_) => Template::render("forum_post", context! { error: "Failed to add comment" }),
+            context! {
+                error: "Failed to add comment",
+                post_id: post_id,
+            },
+        )),
     }
 }

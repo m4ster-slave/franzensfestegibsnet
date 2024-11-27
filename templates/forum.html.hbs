@@ -1,23 +1,47 @@
+{{#> header }}
+<link rel="stylesheet" href="/public/css/forum.css">
+{{/header}}
+
 {{#> layout title="Forum"}}
 {{#*inline "page_content"}}
 <div class="forum-container">
+    <h1>Community Forum</h1>
+    
     {{#if error}}
-        <div class="error-message">{{error}}</div>
+        <div class="error-message">
+            <p>{{error}}</p>
+        </div>
     {{/if}}
+    
     {{#if message}}
-        <div class="success-message">{{message}}</div>
+        <div class="success-message">
+            <p>{{message}}</p>
+        </div>
     {{/if}}
 
     <div class="create-post-button">
-        <a href="/forum/create" class="btn">Create New Post</a>
+        <a href="/forum/create" class="btn">
+            Create New Post
+        </a>
     </div>
 
     <div class="posts-list">
         {{#each posts}}
         <div class="post-card">
             <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
-            <div class="post-meta">Posted on {{format_date this.created_at}}</div>
-            <div class="post-preview">{{truncate this.content 200}}</div>
+            <div class="post-meta">
+                Posted on {{format_date this.created_at}}
+                {{#if this.updated_at}}
+                • Updated on {{format_date this.updated_at}}
+                {{/if}}
+            </div>
+            <div class="post-preview">
+                {{truncate this.content 200}}
+            </div>
+        </div>
+        {{else}}
+        <div class="no-posts-message">
+            <p>No posts yet. Be the first to create one!</p>
         </div>
         {{/each}}
     </div>

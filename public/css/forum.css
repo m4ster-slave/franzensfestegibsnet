@@ -1,0 +1,274 @@
+.forum-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Create post button */
+.create-post-button {
+  margin-bottom: 2rem;
+  text-align: right;
+}
+
+.create-post-button .btn {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(45deg, #00ffff, #ff00ff);
+  color: #0a0a0f;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.create-post-button .btn:hover {
+  transform: scale(1.05);
+}
+
+/* Post cards */
+.posts-list {
+  display: grid;
+  gap: 2rem;
+}
+
+.post-card {
+  background: #151520;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.post-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00ffff, #ff00ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.15);
+}
+
+.post-card:hover::before {
+  opacity: 1;
+}
+
+.post-card h2 {
+  margin: 0 0 1rem 0;
+}
+
+.post-card h2 a {
+  color: #00ffff;
+  text-decoration: none;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.post-card h2 a:hover {
+  color: #ff00ff;
+  text-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 1rem;
+}
+
+.post-preview {
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+/* Single post view */
+.post-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.post-content {
+  background: #151520;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.post-content h1 {
+  color: #00ffff;
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.post-image {
+  margin: 1.5rem 0;
+}
+
+.post-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #2a2a35;
+}
+
+.post-text {
+  color: #e0e0e0;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+/* Comments section */
+.comments-section {
+  background: #151520;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.comments-section h2 {
+  color: #00ffff;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+}
+
+.comment-form {
+  margin-bottom: 2rem;
+}
+
+.comment-form textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 1rem;
+  background: #0a0a0f;
+  border: 1px solid #2a2a35;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-family: "Tomorrow", sans-serif;
+  margin-bottom: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.comment-form textarea:focus {
+  outline: none;
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.comment-form .btn {
+  background: linear-gradient(45deg, #00ffff, #ff00ff);
+  color: #0a0a0f;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.comment-form .btn:hover {
+  transform: scale(1.05);
+}
+
+.comments-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.comment {
+  background: #1a1a25;
+  border: 1px solid #2a2a35;
+  border-radius: 4px;
+  padding: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.comment:hover {
+  transform: translateX(5px);
+}
+
+.comment-content {
+  color: #e0e0e0;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.comment-meta {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Message styles */
+.error-message,
+.success-message {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.error-message {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  color: #ff6b6b;
+}
+
+.success-message {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  color: #00ffaa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .forum-container,
+  .post-container {
+    padding: 1rem;
+  }
+
+  .post-content,
+  .comments-section {
+    padding: 1.5rem;
+  }
+
+  .post-card h2 a {
+    font-size: 1.3rem;
+  }
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: #6c757d;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  color: #fff;
+}
+
+.btn-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-header .btn-secondary {
+  display: inline-block;
+}

@@ -1,29 +1,55 @@
-{{!-- forum_post.html.hbs --}}
+{{#> header }}
+<link rel="stylesheet" href="/public/css/forum.css">
+{{/header}}
+
 {{#> layout title=post.title}}
 {{#*inline "page_content"}}
 <div class="post-container">
     {{#if error}}
-        <div class="error-message">{{error}}</div>
+        <div class="error-message">
+            <p>{{error}}</p>
+        </div>
     {{/if}}
+    
     {{#if message}}
-        <div class="success-message">{{message}}</div>
+        <div class="success-message">
+            <p>{{message}}</p>
+        </div>
     {{/if}}
+
+    <div class="btn-header">
+      <a href="/forum" class="btn btn-secondary">Back to Forum</a>
+    </div>
 
     <div class="post-content">
         <h1>{{post.title}}</h1>
-        <div class="post-meta">Posted on {{format_date post.created_at}}</div>
+        <div class="post-meta">
+            Posted on {{format_date post.created_at}}
+            {{#if post.updated_at}}
+            • Updated on {{format_date post.updated_at}}
+            {{/if}}
+        </div>
+        
         {{#if post.image_url}}
         <div class="post-image">
             <img src="{{post.image_url}}" alt="Post image">
         </div>
         {{/if}}
-        <div class="post-text">{{post.content}}</div>
+        
+        <div class="post-text">
+            {{post.content}}
+        </div>
     </div>
 
     <div class="comments-section">
         <h2>Comments</h2>
+        
         <form action="/forum/{{post.id}}/comment" method="POST" class="comment-form">
-            <textarea name="content" required placeholder="Write your comment..."></textarea>
+            <textarea 
+                name="content" 
+                required 
+                placeholder="Share your thoughts..."
+            ></textarea>
             <button type="submit" class="btn">Add Comment</button>
         </form>
 
@@ -33,8 +59,13 @@
                 <div class="comment-content">{{this.content}}</div>
                 <div class="comment-meta">Posted on {{format_date this.created_at}}</div>
             </div>
+            {{else}}
+            <p class="no-comments">No comments yet. Be the first to comment!</p>
             {{/each}}
         </div>
+    </div>
+    
+    <div class="post-footer">
     </div>
 </div>
 {{/inline}}
