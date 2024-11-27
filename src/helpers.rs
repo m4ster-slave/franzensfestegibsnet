@@ -17,7 +17,7 @@ fn format_date(
 ) -> HelperResult {
     if let Some(param) = h.param(0) {
         if let Some(timestamp) = param.value().as_str() {
-            if let Ok(date) = NaiveDateTime::parse_from_str(timestamp, "%Y-%m-%dT%H:%M:%S") {
+            if let Ok(date) = NaiveDateTime::parse_from_str(timestamp, "%Y-%m-%dT%H:%M:%S%.f") {
                 let formatted = date.format("%B %d, %Y at %H:%M").to_string();
                 out.write(&formatted)?;
                 return Ok(());

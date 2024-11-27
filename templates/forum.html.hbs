@@ -31,9 +31,6 @@
             <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
             <div class="post-meta">
                 Posted on {{format_date this.created_at}}
-                {{#if this.updated_at}}
-                • Updated on {{format_date this.updated_at}}
-                {{/if}}
             </div>
             <div class="post-preview">
                 {{truncate this.content 200}}
