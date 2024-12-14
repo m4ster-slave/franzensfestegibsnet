@@ -13,6 +13,8 @@ use std::env;
 
 #[launch]
 async fn rocket() -> _ {
+    eprintln!("Starting Server....");
+
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
@@ -20,9 +22,13 @@ async fn rocket() -> _ {
         .await
         .expect("Failed to connect to Postgres");
 
+    eprintln!("Connected to server....");
+
     let template = Template::custom(|engines| {
         helpers::register_helpers(&mut engines.handlebars);
     });
+
+    eprintln!("Templates registered.....");
 
     rocket::build()
         .manage(pool)
