@@ -18,7 +18,7 @@
     {{/if}}
 
     <div class="btn-header">
-      <a href="/forum" class="btn btn-secondary">Back to Forum</a>
+        <a href="/forum" class="btn btn-secondary">Back to Forum</a>
     </div>
 
     <div class="post-content">
@@ -60,6 +60,25 @@
             <p class="no-comments">No comments yet. Be the first to comment!</p>
             {{/each}}
         </div>
+
+        {{#if pagination}}
+        <div class="pagination">
+            {{#if (gt pagination.current_page 1)}}
+                <a href="/forum/{{../post.id}}?page={{subtract pagination.current_page 1}}" class="pagination-link">&laquo; Previous</a>
+            {{/if}}
+            
+            <span class="pagination-info">
+                Page {{pagination.current_page}} of {{pagination.total_pages}}
+                {{#if pagination.total_items}}
+                ({{pagination.total_items}} comment{{#if (gt pagination.total_items 1)}}s{{/if}})
+                {{/if}}
+            </span>
+            
+            {{#if (lt pagination.current_page pagination.total_pages)}}
+                <a href="/forum/{{../post.id}}?page={{add pagination.current_page 1}}" class="pagination-link">Next &raquo;</a>
+            {{/if}}
+        </div>
+        {{/if}}
     </div>
     
     <div class="post-footer">

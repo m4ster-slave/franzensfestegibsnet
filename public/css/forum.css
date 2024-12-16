@@ -272,3 +272,32 @@
 .btn-header .btn-secondary {
   display: inline-block;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+.pagination-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #2a2a35;
+  color: #00ffff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.pagination-link:hover {
+  background-color: #00ffff;
+  color: #0a0a0f;
+}
+
+.pagination-info {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}

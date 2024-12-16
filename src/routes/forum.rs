@@ -5,23 +5,41 @@ use rocket::State;
 use rocket_dyn_templates::{context, Template};
 use sqlx::PgPool;
 
-#[get("/forum")]
-pub async fn forum(db: &State<PgPool>) -> Template {
-    match Post::get_all(db.inner()).await {
-        Ok(posts) => Template::render("forum", context! { posts: posts }),
+#[get("/forum?<page>")]
+pub async fn forum(db: &State<PgPool>, page: Option<i64>) -> Template {
+    let page = page.unwrap_or(1);
+    let items_per_page = 10;
+
+    match Post::get_paginated(db.inner(), page, items_per_page).await {
+        Ok((posts, pagination)) => Template::render(
+            "forum",
+            context! {
+                posts: posts,
+                pagination: pagination,
+            },
+        ),
         Err(_) => Template::render("forum", context! { error: "Failed to load posts" }),
     }
 }
 
-#[get("/forum/<id>")]
-pub async fn view_post(db: &State<PgPool>, id: i32) -> Template {
+#[get("/forum/<id>?<page>")]
+pub async fn view_post(db: &State<PgPool>, id: i32, page: Option<i64>) -> Template {
+    let page = page.unwrap_or(1);
+    let items_per_page = 10;
+
     let post_result = Post::get_by_id(db.inner(), id).await;
-    let comments_result = Comment::get_by_post_id(db.inner(), id).await;
+    let comments_result =
+        Comment::get_paginated_by_post_id(db.inner(), id, page, items_per_page).await;
 
     match (post_result, comments_result) {
-        (Ok(post), Ok(comments)) => {
-            Template::render("forum_post", context! { post: post, comments: comments })
-        }
+        (Ok(post), Ok((comments, pagination))) => Template::render(
+            "forum_post",
+            context! {
+                post: post,
+                comments: comments,
+                pagination: pagination,
+            },
+        ),
         _ => Template::render("forum", context! { error: "Failed to load post" }),
     }
 }
@@ -54,7 +72,7 @@ pub async fn create_post(
                             },
                         ));
                     }
-                    Ok(Redirect::to(uri!(forum)))
+                    Ok(Redirect::to(uri!(forum(page = None::<i64>))))
                 }
                 Err(_) => Err(Template::render(
                     "forum_create",
@@ -91,7 +109,10 @@ pub async fn create_comment(
     comment: Form<CreateComment>,
 ) -> Result<Redirect, Template> {
     match Comment::create(db.inner(), post_id, comment.into_inner()).await {
-        Ok(_) => Ok(Redirect::to(uri!(view_post(post_id)))),
+        Ok(_) => Ok(Redirect::to(uri!(view_post(
+            id = post_id,
+            page = Option::<i64>::None
+        )))),
         Err(_) => Err(Template::render(
             "forum_post",
             context! {

@@ -42,6 +42,25 @@
         </div>
         {{/each}}
     </div>
+
+    {{#if pagination}}
+    <div class="pagination">
+        {{#if (gt pagination.current_page 1)}}
+            <a href="/forum?page={{subtract pagination.current_page 1}}" class="pagination-link">&laquo; Previous</a>
+        {{/if}}
+        
+        <span class="pagination-info">
+            Page {{pagination.current_page}} of {{pagination.total_pages}}
+            {{#if pagination.total_items}}
+            ({{pagination.total_items}} post{{#if (gt pagination.total_items 1)}}s{{/if}})
+            {{/if}}
+        </span>
+        
+        {{#if (lt pagination.current_page pagination.total_pages)}}
+            <a href="/forum?page={{add pagination.current_page 1}}" class="pagination-link">Next &raquo;</a>
+        {{/if}}
+    </div>
+    {{/if}}
 </div>
 {{/inline}}
 {{/layout}}

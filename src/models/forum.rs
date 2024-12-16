@@ -23,6 +23,14 @@ pub struct Comment {
     pub updated_at: NaiveDateTime,
 }
 
+#[derive(Debug, Serialize)]
+pub struct Pagination {
+    pub current_page: i64,
+    pub total_pages: i64,
+    pub items_per_page: i64,
+    pub total_items: i64,
+}
+
 #[derive(FromForm)]
 pub struct CreatePost {
     pub title: String,
@@ -35,6 +43,7 @@ pub struct CreatePostFingerprint {
     pub title: String,
     pub content: String,
     pub image_url: Option<String>,
+    pub fingerprint: String,
 }
 
 #[derive(FromForm)]
@@ -95,17 +104,41 @@ impl Post {
         .await
     }
 
-    pub async fn get_all(pool: &PgPool) -> Result<Vec<Post>, sqlx::Error> {
-        sqlx::query_as!(
+    pub async fn get_paginated(
+        pool: &PgPool,
+        page: i64,
+        items_per_page: i64,
+    ) -> Result<(Vec<Post>, Pagination), sqlx::Error> {
+        let total_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM posts")
+            .fetch_one(pool)
+            .await?
+            .unwrap_or(0);
+
+        let total_pages = (total_count + items_per_page - 1) / items_per_page;
+        let offset = (page - 1) * items_per_page;
+
+        let posts = sqlx::query_as!(
             Post,
             r#"
             SELECT *
             FROM posts
             ORDER BY created_at DESC
-            "#
+            LIMIT $1 OFFSET $2
+            "#,
+            items_per_page,
+            offset
         )
         .fetch_all(pool)
-        .await
+        .await?;
+
+        let pagination = Pagination {
+            current_page: page,
+            total_pages,
+            items_per_page,
+            total_items: total_count,
+        };
+
+        Ok((posts, pagination))
     }
 
     pub async fn get_by_id(pool: &PgPool, id: i32) -> Result<Post, sqlx::Error> {
@@ -198,18 +231,44 @@ impl Comment {
         .await
     }
 
-    pub async fn get_by_post_id(pool: &PgPool, post_id: i32) -> Result<Vec<Comment>, sqlx::Error> {
-        sqlx::query_as!(
+    pub async fn get_paginated_by_post_id(
+        pool: &PgPool,
+        post_id: i32,
+        page: i64,
+        items_per_page: i64,
+    ) -> Result<(Vec<Comment>, Pagination), sqlx::Error> {
+        let total_count: i64 =
+            sqlx::query_scalar!("SELECT COUNT(*) FROM comments WHERE post_id = $1", post_id)
+                .fetch_one(pool)
+                .await?
+                .unwrap_or(0);
+
+        let total_pages = (total_count + items_per_page - 1) / items_per_page;
+        let offset = (page - 1) * items_per_page;
+
+        let comments = sqlx::query_as!(
             Comment,
             r#"
             SELECT *
             FROM comments
             WHERE post_id = $1
             ORDER BY created_at ASC
+            LIMIT $2 OFFSET $3
             "#,
-            post_id
+            post_id,
+            items_per_page,
+            offset
         )
         .fetch_all(pool)
-        .await
+        .await?;
+
+        let pagination = Pagination {
+            current_page: page,
+            total_pages,
+            items_per_page,
+            total_items: total_count,
+        };
+
+        Ok((comments, pagination))
     }
 }
