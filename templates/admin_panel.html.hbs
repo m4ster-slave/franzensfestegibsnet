@@ -1,0 +1,92 @@
+{{#> header }}
+<link rel="stylesheet" href="/public/css/admin_style.css">
+{{/header}}
+
+{{#> layout title="Admin Panel"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+    <div class="admin-header">
+        <h1>Admin Panel</h1>
+        <form action="/admin/logout" method="POST" class="logout-form">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </div>
+    
+    {{#if error}}
+        <div class="error-message">
+            <p>{{error}}</p>
+        </div>
+    {{/if}}
+    
+    {{#if message}}
+        <div class="success-message">
+            <p>{{message}}</p>
+        </div>
+    {{/if}}
+    
+    <div class="posts-list">
+        {{#each posts}}
+        <div class="post-card">
+            <div class="post-actions" style="display: inline;">
+                    <button onclick="toggleEdit({{this.id}})" class="btn-edit">Edit</button>
+                <form action="/admin/posts/{{this.id}}/delete" method="POST" style="display: inline;">
+                    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </div>
+            
+            <div id="post-view-{{this.id}}">
+                <h2>{{this.title}}</h2>
+                <div class="post-meta">Posted on {{format_date this.created_at}}</div>
+                <div class="post-content">{{this.content}}</div>
+                {{#if this.image_url}}
+                <div class="post-image">
+                    <img src="{{this.image_url}}" alt="Post image">
+                </div>
+                {{/if}}
+            </div>
+            
+            <div id="post-edit-{{this.id}}" style="display: none;">
+                <form action="/admin/posts/{{this.id}}/edit" method="POST">
+                    <div class="form-group">
+                        <label for="title-{{this.id}}">Title</label>
+                        <input type="text" id="title-{{this.id}}" name="title" value="{{this.title}}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content-{{this.id}}">Content</label>
+                        <textarea id="content-{{this.id}}" name="content" required>{{this.content}}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="image_url-{{this.id}}">Image URL</label>
+                        <input type="url" id="image_url-{{this.id}}" name="image_url" value="{{this.image_url}}">
+                    </div>
+                    
+                    <button type="submit" class="btn-save">Save</button>
+                    <button type="button" onclick="toggleEdit({{this.id}})" class="btn-cancel">Cancel</button>
+                </form>
+            </div>
+        </div>
+        {{else}}
+        <div class="no-posts-message">
+            <p>No posts found.</p>
+        </div>
+        {{/each}}
+    </div>
+</div>
+
+<script>
+function toggleEdit(postId) {
+    const viewDiv = document.getElementById(`post-view-${postId}`);
+    const editDiv = document.getElementById(`post-edit-${postId}`);
+    if (viewDiv.style.display === 'none') {
+        viewDiv.style.display = 'block';
+        editDiv.style.display = 'none';
+    } else {
+        viewDiv.style.display = 'none';
+        editDiv.style.display = 'block';
+    }
+}
+</script>
+{{/inline}}
+{{/layout}}

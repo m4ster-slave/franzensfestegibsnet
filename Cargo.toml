@@ -13,3 +13,5 @@ pulldown-cmark = "0.12.2"
 sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono"] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15.0"
+sha2 = "0.10.8"
+hex = "0.4.3"

@@ -88,6 +88,19 @@ impl<'r> FromRequest<'r> for ClientInfo {
 }
 
 impl Post {
+    pub async fn get_all(pool: &PgPool) -> Result<Vec<Post>, sqlx::Error> {
+        sqlx::query_as!(
+            Post,
+            r#"
+            SELECT *
+            FROM posts
+            ORDER BY created_at DESC
+            "#
+        )
+        .fetch_all(pool)
+        .await
+    }
+
     pub async fn create(pool: &PgPool, post: CreatePost) -> Result<Post, sqlx::Error> {
         sqlx::query_as!(
             Post,

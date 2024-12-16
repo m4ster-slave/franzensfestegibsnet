@@ -519,11 +519,13 @@ dependencies = [
  "chrono",
  "dotenv",
  "handlebars",
+ "hex",
  "pulldown-cmark",
  "rocket",
  "rocket_dyn_templates",
  "rocket_sync_db_pools",
  "serde",
+ "sha2",
  "sqlx",
 ]
 
