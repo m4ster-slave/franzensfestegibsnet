@@ -30,6 +30,14 @@ pub struct CreatePost {
 }
 
 #[derive(FromForm)]
+pub struct CreatePostFingerprint {
+    pub title: String,
+    pub content: String,
+    pub image_url: Option<String>,
+    pub fingerprint: String,
+}
+
+#[derive(FromForm)]
 pub struct CreateComment {
     pub content: String,
 }

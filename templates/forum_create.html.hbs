@@ -1,12 +1,13 @@
 {{#> header }}
 <link rel="stylesheet" href="/public/css/forum_create_style.css">
+<script type="module" src="/public/js/createpost.js"></script>
 {{/header}}
 
 {{#> layout title="Forum"}}
 {{#*inline "page_content"}}
 <div class="forum-post-container">
   <h1>Create a New Forum Post</h1>
-  <form action="/forum/create" method="POST">
+  <form action="/forum/create" method="POST" id="postForm">
     <div class="form-group">
       <label for="title">Title</label>
       <input type="text" id="title" name="title" required placeholder="Enter your post title" />
@@ -21,7 +22,10 @@
       <label for="image_url">Image URL (optional)</label>
       <input type="url" id="image_url" name="image_url" placeholder="Enter image URL (optional)" />
     </div>
-    <button type="submit" class="btn btn-primary">Submit Post</button>
+
+    <input type="hidden" id="fingerprint" name="fingerprint" value="" />
+    <button type="submit" class="btn btn-primary" id="submitButton">Submit Post</button>
+
   </form>
   <div class="form-footer">
     <a href="/forum" class="btn btn-secondary">Back to Forum</a>

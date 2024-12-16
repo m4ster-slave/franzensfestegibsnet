@@ -27,8 +27,22 @@ pub async fn view_post(db: &State<PgPool>, id: i32) -> Template {
 }
 
 #[post("/forum/create", data = "<post>")]
-pub async fn create_post(db: &State<PgPool>, post: Form<CreatePost>) -> Result<Redirect, Template> {
-    match Post::create(db.inner(), post.into_inner()).await {
+pub async fn create_post(
+    db: &State<PgPool>,
+    post: Form<CreatePostFingerprint>,
+) -> Result<Redirect, Template> {
+    println!("User Fingerprint: {}", post.fingerprint);
+
+    match Post::create(
+        db.inner(),
+        CreatePost {
+            title: post.title.clone(),
+            content: post.content.clone(),
+            image_url: post.image_url.clone(),
+        },
+    )
+    .await
+    {
         Ok(_) => Ok(Redirect::to(uri!(forum))),
         Err(_) => Err(Template::render(
             "forum_create",
