@@ -7,6 +7,13 @@
 {{#*inline "page_content"}}
 <div class="forum-post-container">
   <h1>Create a New Forum Post</h1>
+
+  {{#if error}}
+      <div class="error-message">
+          <p>{{error}}</p>
+      </div>
+  {{/if}}
+
   <form action="/forum/create" method="POST" id="postForm">
     <div class="form-group">
       <label for="title">Title</label>

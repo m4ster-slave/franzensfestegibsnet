@@ -121,4 +121,13 @@ async function generateHash(str: string): Promise<string> {
   return hashArray.map((b) => ("00" + b.toString(16)).slice(-2)).join("");
 }
 
+async function getFingerprint(): Promise<string> {
+  try {
+    return await generateFingerprint();
+  } catch (error) {
+    console.error("Error generating fingerprint:", error);
+    return "error-generating-fingerprint";
+  }
+}
+
 export { getFingerprint };

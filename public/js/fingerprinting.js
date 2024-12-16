@@ -92,7 +92,6 @@ function generateHash(str) {
         return hashArray.map((b) => ("00" + b.toString(16)).slice(-2)).join("");
     });
 }
-// Example usage with error handling:
 function getFingerprint() {
     return __awaiter(this, void 0, void 0, function* () {
         try {

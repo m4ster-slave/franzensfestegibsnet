@@ -9,11 +9,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { getFingerprint } from "/public/js/fingerprinting.js";
 const form = document.getElementById("postForm");
-const inputElement = document.getElementById("fingerprint");
-function setFingerprint() {
+let fingerprint;
+function initForm() {
     return __awaiter(this, void 0, void 0, function* () {
-        const fingerprint = yield getFingerprint();
-        inputElement.value = fingerprint;
+        fingerprint = yield getFingerprint();
+        form.addEventListener("submit", (e) => __awaiter(this, void 0, void 0, function* () {
+            e.preventDefault();
+            try {
+                const formData = new FormData(form);
+                const response = yield fetch("/forum/create", {
+                    method: "POST",
+                    headers: {
+                        "X-Fingerprint": fingerprint,
+                    },
+                    body: formData,
+                });
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+                else {
+                    const data = yield response.text();
+                    document.body.innerHTML = data;
+                }
+            }
+            catch (error) {
+                console.error("Error submitting form:", error);
+            }
+        }));
     });
 }
-setFingerprint();
+initForm();

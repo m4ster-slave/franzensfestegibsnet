@@ -30,24 +30,50 @@ pub async fn view_post(db: &State<PgPool>, id: i32) -> Template {
 pub async fn create_post(
     db: &State<PgPool>,
     post: Form<CreatePostFingerprint>,
+    client_info: ClientInfo,
 ) -> Result<Redirect, Template> {
-    println!("User Fingerprint: {}", post.fingerprint);
+    match Post::validate_client(db.inner(), &client_info).await {
+        Ok(true) => {
+            let create_result = Post::create(
+                db.inner(),
+                CreatePost {
+                    title: post.title.clone(),
+                    content: post.content.clone(),
+                    image_url: post.image_url.clone(),
+                },
+            )
+            .await;
 
-    match Post::create(
-        db.inner(),
-        CreatePost {
-            title: post.title.clone(),
-            content: post.content.clone(),
-            image_url: post.image_url.clone(),
-        },
-    )
-    .await
-    {
-        Ok(_) => Ok(Redirect::to(uri!(forum))),
+            match create_result {
+                Ok(_) => {
+                    if (Post::update_client_info(db.inner(), &client_info).await).is_err() {
+                        return Err(Template::render(
+                            "forum_create",
+                            context! {
+                                error: "Failed to update client info"
+                            },
+                        ));
+                    }
+                    Ok(Redirect::to(uri!(forum)))
+                }
+                Err(_) => Err(Template::render(
+                    "forum_create",
+                    context! {
+                        error: "Failed to create post"
+                    },
+                )),
+            }
+        }
+        Ok(false) => Err(Template::render(
+            "forum_create",
+            context! {
+                error: "Too many posts. Please wait before posting again."
+            },
+        )),
         Err(_) => Err(Template::render(
             "forum_create",
             context! {
-                error: "Failed to create post"
+                error: "Failed to validate post"
             },
         )),
     }
