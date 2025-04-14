@@ -28,7 +28,7 @@
         {{#each posts}}
         <div class="post-card">
             <div class="post-actions" style="display: inline;">
-                    <button onclick="toggleEdit({{this.id}})" class="btn-edit">Edit</button>
+                    <button onclick="location.href = '/admin/posts/{{this.id}}/edit'" class="btn-edit">Edit</button>
                 <form action="/admin/posts/{{this.id}}/delete" method="POST" style="display: inline;">
                     <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
@@ -45,27 +45,6 @@
                 {{/if}}
             </div>
             
-            <div id="post-edit-{{this.id}}" style="display: none;">
-                <form action="/admin/posts/{{this.id}}/edit" method="POST">
-                    <div class="form-group">
-                        <label for="title-{{this.id}}">Title</label>
-                        <input type="text" id="title-{{this.id}}" name="title" value="{{this.title}}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="content-{{this.id}}">Content</label>
-                        <textarea id="content-{{this.id}}" name="content" required>{{this.content}}</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="image_url-{{this.id}}">Image URL</label>
-                        <input type="url" id="image_url-{{this.id}}" name="image_url" value="{{this.image_url}}">
-                    </div>
-                    
-                    <button type="submit" class="btn-save">Save</button>
-                    <button type="button" onclick="toggleEdit({{this.id}})" class="btn-cancel">Cancel</button>
-                </form>
-            </div>
         </div>
         {{else}}
         <div class="no-posts-message">
@@ -75,18 +54,5 @@
     </div>
 </div>
 
-<script>
-function toggleEdit(postId) {
-    const viewDiv = document.getElementById(`post-view-${postId}`);
-    const editDiv = document.getElementById(`post-edit-${postId}`);
-    if (viewDiv.style.display === 'none') {
-        viewDiv.style.display = 'block';
-        editDiv.style.display = 'none';
-    } else {
-        viewDiv.style.display = 'none';
-        editDiv.style.display = 'block';
-    }
-}
-</script>
 {{/inline}}
 {{/layout}}

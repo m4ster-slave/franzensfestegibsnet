@@ -17,7 +17,10 @@ pub fn routes() -> Vec<rocket::Route> {
         admin::admin_login,
         admin::admin_login_post,
         admin::admin_logout,
-        admin::edit_post,
+        admin::edit_post_panel,
         admin::delete_post,
+        admin::update_post,
+        admin::delete_comment,
+        admin::edit_comment,
     ]
 }

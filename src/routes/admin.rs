@@ -1,4 +1,4 @@
-use crate::models::forum::Post;
+use crate::models::forum::{Comment, Post};
 use rocket::form::Form;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::Redirect;
@@ -118,8 +118,39 @@ pub async fn delete_post(
     }
 }
 
+#[get("/admin/posts/<id>/edit")]
+pub async fn edit_post_panel(
+    cookies: &CookieJar<'_>,
+    db: &State<PgPool>,
+    id: i32,
+) -> Result<Template, Redirect> {
+    if !is_admin(cookies) {
+        return Err(Redirect::to(uri!(admin_login)));
+    }
+
+    let post_result = Post::get_by_id(db.inner(), id).await;
+    // Get all comments with a large page size
+    let comments_result = Comment::get_paginated_by_post_id(db.inner(), id, 1, 1000).await;
+
+    match (post_result, comments_result) {
+        (Ok(post), Ok(comments)) => Ok(Template::render(
+            "admin_edit_post",
+            context! {
+                post: post,
+                comments: comments
+            },
+        )),
+        _ => Ok(Template::render(
+            "admin_edit_post",
+            context! {
+                error: "Failed to load post data"
+            },
+        )),
+    }
+}
+
 #[post("/admin/posts/<id>/edit", data = "<post>")]
-pub async fn edit_post(
+pub async fn update_post(
     cookies: &CookieJar<'_>,
     db: &State<PgPool>,
     id: i32,
@@ -142,7 +173,77 @@ pub async fn edit_post(
     .execute(db.inner())
     .await
     {
-        Ok(_) => Ok(Redirect::to(uri!(admin_panel))),
-        Err(_) => Ok(Redirect::to(uri!(admin_panel))),
+        Ok(_) => Ok(Redirect::to(uri!(edit_post_panel(id)))),
+        Err(_) => Ok(Redirect::to(uri!(edit_post_panel(id)))),
     }
+}
+
+#[post("/admin/comments/<id>/delete")]
+pub async fn delete_comment(
+    cookies: &CookieJar<'_>,
+    db: &State<PgPool>,
+    id: i32,
+) -> Result<Redirect, Template> {
+    if !is_admin(cookies) {
+        return Err(Template::render(
+            "admin_login",
+            context! { error: "Not authorized" },
+        ));
+    }
+
+    let post_id = match sqlx::query!("SELECT post_id FROM comments WHERE id = $1", id)
+        .fetch_optional(db.inner())
+        .await
+    {
+        Ok(Some(record)) => record.post_id,
+        _ => return Ok(Redirect::to(uri!(admin_panel))),
+    };
+
+    match sqlx::query!("DELETE FROM comments WHERE id = $1", id)
+        .execute(db.inner())
+        .await
+    {
+        Ok(_) => Ok(Redirect::to(uri!(edit_post_panel(post_id)))),
+        Err(_) => Ok(Redirect::to(uri!(edit_post_panel(post_id)))),
+    }
+}
+
+#[post("/admin/comments/<id>/edit", data = "<comment>")]
+pub async fn edit_comment(
+    cookies: &CookieJar<'_>,
+    db: &State<PgPool>,
+    id: i32,
+    comment: Form<EditComment>,
+) -> Result<Redirect, Template> {
+    if !is_admin(cookies) {
+        return Err(Template::render(
+            "admin_login",
+            context! { error: "Not authorized" },
+        ));
+    }
+
+    let post_id = match sqlx::query!("SELECT post_id FROM comments WHERE id = $1", id)
+        .fetch_optional(db.inner())
+        .await
+    {
+        Ok(Some(record)) => record.post_id,
+        _ => return Ok(Redirect::to(uri!(admin_panel))),
+    };
+
+    match sqlx::query!(
+        "UPDATE comments SET content = $1 WHERE id = $2",
+        comment.content,
+        id
+    )
+    .execute(db.inner())
+    .await
+    {
+        Ok(_) => Ok(Redirect::to(uri!(edit_post_panel(post_id)))),
+        Err(_) => Ok(Redirect::to(uri!(edit_post_panel(post_id)))),
+    }
+}
+
+#[derive(FromForm)]
+pub struct EditComment {
+    content: String,
 }
