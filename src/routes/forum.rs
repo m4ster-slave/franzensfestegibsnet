@@ -7,8 +7,12 @@ use sqlx::PgPool;
 
 #[get("/forum?<page>")]
 pub async fn forum(db: &State<PgPool>, page: Option<i64>) -> Template {
-    let page = page.unwrap_or(1);
+    let mut page = page.unwrap_or(1);
     let items_per_page = 10;
+
+    if page < 1 {
+        page = 1;
+    }
 
     match Post::get_paginated(db.inner(), page, items_per_page).await {
         Ok((posts, pagination)) => Template::render(
@@ -24,8 +28,12 @@ pub async fn forum(db: &State<PgPool>, page: Option<i64>) -> Template {
 
 #[get("/forum/<id>?<page>")]
 pub async fn view_post(db: &State<PgPool>, id: i32, page: Option<i64>) -> Template {
-    let page = page.unwrap_or(1);
+    let mut page = page.unwrap_or(1);
     let items_per_page = 10;
+
+    if page < 1 {
+        page = 1;
+    }
 
     let post_result = Post::get_by_id(db.inner(), id).await;
     let comments_result =
