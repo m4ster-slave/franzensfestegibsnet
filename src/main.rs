@@ -35,7 +35,7 @@ async fn rocket() -> _ {
         .attach(template)
         .mount("/", routes::routes())
         .mount(
-            "/public",
+            "/",
             FileServer::new(
                 relative!("/public"),
                 Options::Missing | Options::NormalizeDirs,
