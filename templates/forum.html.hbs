@@ -1,66 +1,72 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/forum.css">
-{{/header}}
+{{/inline}}
 
 {{#> layout title="Forum"}}
 {{#*inline "page_content"}}
-<div class="forum-container">
-    <h1>Community Forum</h1>
-    
-    {{#if error}}
-        <div class="error-message">
-            <p>{{error}}</p>
-        </div>
-    {{/if}}
-    
-    {{#if message}}
-        <div class="success-message">
-            <p>{{message}}</p>
-        </div>
+<section class="forum-container dossier-page">
+  <header class="page-intro">
+    <p class="eyebrow">Community transmissions</p>
+    <h1>Field Forum</h1>
+    <p>Reports, sightings, corrections, and nervous little footnotes from the Franzensfeste perimeter.</p>
+  </header>
+
+  {{#if error}}
+  <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  {{#if message}}
+  <div class="success-message"><p>{{message}}</p></div>
+  {{/if}}
+
+  {{#if current_user}}
+  <div class="action-strip">
+    <span>Authenticated as {{current_user.username}}</span>
+    <a href="/forum/create" class="btn btn-primary">Open new report</a>
+  </div>
+  {{else}}
+  <div class="auth-prompt">
+    <div>
+      <strong>Posting requires a field identity.</strong>
+      <p>Login or create an account before adding new reports to the board.</p>
+    </div>
+    <div class="auth-prompt__actions">
+      <a href="/login" class="btn btn-primary">Login</a>
+      <a href="/register" class="btn btn-secondary">Create account</a>
+    </div>
+  </div>
+  {{/if}}
+
+  <div class="posts-list">
+    {{#each posts}}
+    <article class="post-card evidence-card">
+      <div class="case-tag">Report #{{this.id}}</div>
+      <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
+      <div class="post-meta">Filed {{format_date this.created_at}}</div>
+      <p class="post-preview">{{truncate this.content 220}}</p>
+    </article>
+    {{else}}
+    <div class="empty-state">
+      <p>No reports filed yet. Suspiciously quiet.</p>
+    </div>
+    {{/each}}
+  </div>
+
+  {{#if pagination}}
+  <nav class="pagination" aria-label="Forum pagination">
+    {{#if (gt pagination.current_page 1)}}
+    <a href="/forum?page={{subtract pagination.current_page 1}}" class="pagination-link">Previous</a>
     {{/if}}
 
-    <div class="create-post-button">
-        <a href="/forum/create" class="btn">
-            Create New Post
-        </a>
-    </div>
+    <span class="pagination-info">
+      Page {{pagination.current_page}} of {{pagination.total_pages}}
+    </span>
 
-    <div class="posts-list">
-        {{#each posts}}
-        <div class="post-card">
-            <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
-            <div class="post-meta">
-                Posted on {{format_date this.created_at}}
-            </div>
-            <div class="post-preview">
-                {{truncate this.content 200}}
-            </div>
-        </div>
-        {{else}}
-        <div class="no-posts-message">
-            <p>No posts yet. Be the first to create one!</p>
-        </div>
-        {{/each}}
-    </div>
-
-    {{#if pagination}}
-    <div class="pagination">
-        {{#if (gt pagination.current_page 1)}}
-            <a href="/forum?page={{subtract pagination.current_page 1}}" class="pagination-link">&laquo; Previous</a>
-        {{/if}}
-        
-        <span class="pagination-info">
-            Page {{pagination.current_page}} of {{pagination.total_pages}}
-            {{#if pagination.total_items}}
-            ({{pagination.total_items}} post{{#if (gt pagination.total_items 1)}}s{{/if}})
-            {{/if}}
-        </span>
-        
-        {{#if (lt pagination.current_page pagination.total_pages)}}
-            <a href="/forum?page={{add pagination.current_page 1}}" class="pagination-link">Next &raquo;</a>
-        {{/if}}
-    </div>
+    {{#if (lt pagination.current_page pagination.total_pages)}}
+    <a href="/forum?page={{add pagination.current_page 1}}" class="pagination-link">Next</a>
     {{/if}}
-</div>
+  </nav>
+  {{/if}}
+</section>
 {{/inline}}
 {{/layout}}

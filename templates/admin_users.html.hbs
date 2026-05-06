@@ -1,0 +1,59 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Users"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+  <div class="admin-header">
+    <h1>Users</h1>
+    <a href="/admin" class="btn-edit">Dashboard</a>
+  </div>
+
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <div class="admin-table">
+    <div class="admin-table-row admin-table-head">
+      <span>User</span>
+      <span>Email</span>
+      <span>Role</span>
+      <span>Status</span>
+      <span>Actions</span>
+    </div>
+    {{#each users}}
+    <div class="admin-table-row">
+      <span>{{this.username}}</span>
+      <span>{{this.email}}</span>
+      <span>
+        <form action="/admin/users/{{this.id}}/role" method="POST" class="inline-form">
+          <select name="role">
+            <option value="{{this.role}}">{{this.role}}</option>
+            <option value="user">user</option>
+            <option value="moderator">moderator</option>
+            <option value="admin">admin</option>
+          </select>
+          <button type="submit" class="btn-save">Save</button>
+        </form>
+      </span>
+      <span>{{#if this.disabled}}disabled{{else}}active{{/if}}</span>
+      <span>
+        {{#if this.disabled}}
+        <form action="/admin/users/{{this.id}}/enable" method="POST" class="inline-form">
+          <button type="submit" class="btn-save">Enable</button>
+        </form>
+        {{else}}
+        <form action="/admin/users/{{this.id}}/disable" method="POST" class="inline-form">
+          <button type="submit" class="btn-delete">Disable</button>
+        </form>
+        {{/if}}
+      </span>
+    </div>
+    {{else}}
+    <p>No users found.</p>
+    {{/each}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}

@@ -1,0 +1,57 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+<script type="module" src="/js/uploads.js"></script>
+{{/inline}}
+
+{{#> layout title="Edit Article"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+  <div class="admin-header">
+    <h1>{{#if is_new}}New Article{{else}}Edit Article{{/if}}</h1>
+    <a href="/admin/articles" class="btn-edit">Articles</a>
+  </div>
+
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <form action="{{action}}" method="POST" class="edit-form">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" value="{{article.title}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="slug">Slug</label>
+      <input type="text" id="slug" name="slug" value="{{article.slug}}" placeholder="auto-generated-from-title">
+    </div>
+
+    <div class="form-group">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="{{article.status}}">{{#if article.status}}{{article.status}}{{else}}draft{{/if}}</option>
+        <option value="draft">draft</option>
+        <option value="published">published</option>
+        <option value="archived">archived</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="content">Markdown Content</label>
+      <textarea id="content" name="content" rows="18" required>{{article.content}}</textarea>
+    </div>
+
+    <button type="submit" class="btn-primary">Save Article</button>
+  </form>
+
+  <form class="upload-form" data-upload-target="content">
+    <div class="form-group">
+      <label for="article_image">Insert Local Image</label>
+      <input type="file" id="article_image" name="file" accept="image/png,image/jpeg,image/webp,image/gif">
+    </div>
+    <button type="submit" class="btn-save">Upload Image</button>
+    <span class="upload-result"></span>
+  </form>
+</div>
+{{/inline}}
+{{/layout}}

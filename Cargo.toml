@@ -4,14 +4,19 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocket = {version = "0.5.0-rc.2", features = ["json"] }
+rocket = {version = "0.5.0-rc.2", features = ["json", "secrets"] }
 rocket_dyn_templates = { version = "0.1.0-rc.2", features = ["handlebars"] }
 rocket_sync_db_pools = "0.1.0-rc.2"
 serde = { version = "1.0", features = ["derive"] }
 handlebars = "4.3.1"
 pulldown-cmark = "0.12.2"
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono", "migrate"] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15.0"
 sha2 = "0.10.8"
 hex = "0.4.3"
+argon2 = "0.5.3"
+ammonia = "4.0.0"
+rand = "0.8.5"
+tokio = { version = "1.41.1", features = ["fs"] }
+uuid = { version = "1.11.0", features = ["v4", "serde"] }

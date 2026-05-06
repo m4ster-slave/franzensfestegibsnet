@@ -1,58 +1,57 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/admin_style.css">
-{{/header}}
+{{/inline}}
 
 {{#> layout title="Admin Panel"}}
 {{#*inline "page_content"}}
 <div class="admin-panel-container">
-    <div class="admin-header">
-        <h1>Admin Panel</h1>
-        <form action="/admin/logout" method="POST" class="logout-form">
-            <button type="submit" class="btn-logout">Logout</button>
-        </form>
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">Restricted desk</p>
+      <h1>Admin Panel</h1>
     </div>
-    
-    {{#if error}}
-        <div class="error-message">
-            <p>{{error}}</p>
-        </div>
-    {{/if}}
-    
-    {{#if message}}
-        <div class="success-message">
-            <p>{{message}}</p>
-        </div>
-    {{/if}}
-    
-    <div class="posts-list">
-        {{#each posts}}
-        <div class="post-card">
-            <div class="post-actions" style="display: inline;">
-                    <button onclick="location.href = '/admin/posts/{{this.id}}/edit'" class="btn-edit">Edit</button>
-                <form action="/admin/posts/{{this.id}}/delete" method="POST" style="display: inline;">
-                    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
-                </form>
-            </div>
-            
-            <div id="post-view-{{this.id}}">
-                <h2>{{this.title}}</h2>
-                <div class="post-meta">Posted on {{format_date this.created_at}}</div>
-                <div class="post-content">{{this.content}}</div>
-                {{#if this.image_url}}
-                <div class="post-image">
-                    <img src="{{this.image_url}}" alt="Post image">
-                </div>
-                {{/if}}
-            </div>
-            
-        </div>
-        {{else}}
-        <div class="no-posts-message">
-            <p>No posts found.</p>
-        </div>
-        {{/each}}
-    </div>
-</div>
+  </div>
 
+  <div class="admin-nav">
+    <a href="/admin/users" class="btn-edit">Users</a>
+    <a href="/admin/articles" class="btn-edit">Articles</a>
+    <a href="/admin/moderation" class="btn-edit">Moderation</a>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.users}}</span>
+      <span>Users</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.posts_visible}}</span>
+      <span>Visible Posts</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.posts_hidden}}</span>
+      <span>Hidden Posts</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.posts_removed}}</span>
+      <span>Removed Posts</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.comments_visible}}</span>
+      <span>Visible Comments</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.comments_hidden}}</span>
+      <span>Hidden Comments</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.articles_published}}</span>
+      <span>Published Articles</span>
+    </div>
+    <div class="dashboard-card">
+      <span class="dashboard-number">{{stats.articles_draft}}</span>
+      <span>Draft Articles</span>
+    </div>
+  </div>
+</div>
 {{/inline}}
 {{/layout}}

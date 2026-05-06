@@ -1,0 +1,105 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Moderation"}}
+{{#*inline "page_content"}}
+<section class="admin-panel-container moderation-board">
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">Review queue</p>
+      <h1>Moderation Board</h1>
+    </div>
+    <a href="/admin" class="btn-edit">Dashboard</a>
+  </div>
+
+  {{#if error}}
+  <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <div class="moderation-list">
+    {{#each posts}}
+    <details class="moderation-case evidence-card">
+      <summary>
+        <span class="case-tag">Post #{{post.id}}</span>
+        <span class="moderation-case__title">{{post.title}}</span>
+        <span class="status-pill status-pill--{{post.status}}">{{post.status}}</span>
+        {{#if post.locked}}<span class="status-pill">locked</span>{{/if}}
+        <span class="moderation-case__meta">expand comments</span>
+      </summary>
+
+      <div class="moderation-case__body">
+        <div class="moderation-preview">
+          <div class="post-meta">Filed {{format_date post.created_at}}</div>
+          <div class="post-content">{{{content_html}}}</div>
+        </div>
+
+        <div class="moderation-actions">
+          <a href="/admin/posts/{{post.id}}/edit" class="btn-edit">Edit post</a>
+          {{#if post.locked}}
+          <form action="/admin/posts/{{post.id}}/unlock" method="POST">
+            <button type="submit" class="btn-save">Unlock</button>
+          </form>
+          {{else}}
+          <form action="/admin/posts/{{post.id}}/lock" method="POST">
+            <button type="submit" class="btn-delete">Lock</button>
+          </form>
+          {{/if}}
+        </div>
+
+        <form action="/admin/posts/{{post.id}}/moderate" method="POST" class="moderation-form">
+          <label>
+            Status
+            <select name="status">
+              <option value="{{post.status}}">{{post.status}}</option>
+              <option value="visible">visible</option>
+              <option value="hidden">hidden</option>
+              <option value="removed">removed</option>
+            </select>
+          </label>
+          <label>
+            Moderator note
+            <input type="text" name="moderator_note" value="{{post.moderator_note}}" placeholder="Internal note">
+          </label>
+          <button type="submit" class="btn-save">Apply to post</button>
+        </form>
+
+        <div class="nested-comments">
+          <h2>Comments</h2>
+          {{#each comments}}
+          <article class="moderation-comment">
+            <div class="comment-meta">
+              Comment #{{comment.id}} · {{format_date comment.created_at}}
+              <span class="status-pill status-pill--{{comment.status}}">{{comment.status}}</span>
+            </div>
+            <div class="comment-content">{{{content_html}}}</div>
+            <form action="/admin/comments/{{comment.id}}/moderate" method="POST" class="moderation-form">
+              <label>
+                Status
+                <select name="status">
+                  <option value="{{comment.status}}">{{comment.status}}</option>
+                  <option value="visible">visible</option>
+                  <option value="hidden">hidden</option>
+                  <option value="removed">removed</option>
+                </select>
+              </label>
+              <label>
+                Moderator note
+                <input type="text" name="moderator_note" value="{{comment.moderator_note}}" placeholder="Internal note">
+              </label>
+              <button type="submit" class="btn-save">Apply to comment</button>
+            </form>
+          </article>
+          {{else}}
+          <p class="empty-state">No comments attached.</p>
+          {{/each}}
+        </div>
+      </div>
+    </details>
+    {{else}}
+    <p class="empty-state">Nothing in the queue.</p>
+    {{/each}}
+  </div>
+</section>
+{{/inline}}
+{{/layout}}

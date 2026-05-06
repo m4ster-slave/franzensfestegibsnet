@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { getFingerprint } from "/public/js/fingerprinting.js";
+import { getFingerprint } from "/js/fingerprinting.js";
 const form = document.getElementById("postForm");
 let fingerprint;
 function initForm() {

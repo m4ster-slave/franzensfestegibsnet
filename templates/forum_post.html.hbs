@@ -1,88 +1,86 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/forum.css">
-{{/header}}
+{{/inline}}
 
-{{#> layout title=post.title}}
+{{#> layout title=rendered_post.post.title}}
 {{#*inline "page_content"}}
-<div class="post-container">
-    {{#if error}}
-        <div class="error-message">
-            <p>{{error}}</p>
-        </div>
+<section class="post-container dossier-page">
+  {{#if error}}
+  <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <a href="/forum" class="back-link">Back to forum</a>
+
+  <article class="post-content evidence-card">
+    <div class="case-tag">Report #{{rendered_post.post.id}}</div>
+    <h1>{{rendered_post.post.title}}</h1>
+    <div class="post-meta">
+      Filed {{format_date rendered_post.post.created_at}}
+      {{#if rendered_post.post.locked}} · Locked by moderation{{/if}}
+    </div>
+
+    <div class="post-text">
+      {{{rendered_post.content_html}}}
+    </div>
+  </article>
+
+  <section class="comments-section evidence-card">
+    <div class="section-heading">
+      <p class="eyebrow">Witness notes</p>
+      <h2>Comments</h2>
+    </div>
+
+    {{#if current_user}}
+      {{#if rendered_post.post.locked}}
+      <div class="auth-prompt auth-prompt--compact">
+        <strong>This report is locked.</strong>
+        <p>No further notes can be attached.</p>
+      </div>
+      {{else}}
+      <form action="/forum/{{rendered_post.post.id}}/comment" method="POST" class="comment-form">
+        <label for="comment-content">Attach a note</label>
+        <textarea id="comment-content" name="content" required placeholder="Markdown accepted. Keep it sharp."></textarea>
+        <button type="submit" class="btn btn-primary">Add note</button>
+      </form>
+      {{/if}}
+    {{else}}
+    <div class="auth-prompt auth-prompt--compact">
+      <div>
+        <strong>Want to attach a note?</strong>
+        <p>Login or create an account before commenting.</p>
+      </div>
+      <div class="auth-prompt__actions">
+        <a href="/login" class="btn btn-primary">Login</a>
+        <a href="/register" class="btn btn-secondary">Create account</a>
+      </div>
+    </div>
     {{/if}}
-    
-    {{#if message}}
-        <div class="success-message">
-            <p>{{message}}</p>
-        </div>
+
+    <div class="comments-list">
+      {{#each comments}}
+      <article class="comment">
+        <div class="comment-content">{{{this.content_html}}}</div>
+        <div class="comment-meta">{{format_date this.comment.created_at}}</div>
+      </article>
+      {{else}}
+      <p class="empty-state">No notes yet.</p>
+      {{/each}}
+    </div>
+
+    {{#if pagination}}
+    <nav class="pagination" aria-label="Comment pagination">
+      {{#if (gt pagination.current_page 1)}}
+      <a href="/forum/{{../rendered_post.post.id}}?page={{subtract pagination.current_page 1}}" class="pagination-link">Previous</a>
+      {{/if}}
+
+      <span class="pagination-info">Page {{pagination.current_page}} of {{pagination.total_pages}}</span>
+
+      {{#if (lt pagination.current_page pagination.total_pages)}}
+      <a href="/forum/{{../rendered_post.post.id}}?page={{add pagination.current_page 1}}" class="pagination-link">Next</a>
+      {{/if}}
+    </nav>
     {{/if}}
-
-    <div class="btn-header">
-        <a href="/forum" class="btn btn-secondary">Back to Forum</a>
-    </div>
-
-    <div class="post-content">
-        <h1>{{post.title}}</h1>
-        <div class="post-meta">
-            Posted on {{format_date post.created_at}}
-        </div>
-        
-        {{#if post.image_url}}
-        <div class="post-image">
-            <img src="{{post.image_url}}" alt="Post image">
-        </div>
-        {{/if}}
-        
-        <div class="post-text">
-            {{post.content}}
-        </div>
-    </div>
-
-    <div class="comments-section">
-        <h2>Comments</h2>
-        
-        <form action="/forum/{{post.id}}/comment" method="POST" class="comment-form">
-            <textarea 
-                name="content" 
-                required 
-                placeholder="Share your thoughts..."
-            ></textarea>
-            <button type="submit" class="btn">Add Comment</button>
-        </form>
-
-        <div class="comments-list">
-            {{#each comments}}
-            <div class="comment">
-                <div class="comment-content">{{this.content}}</div>
-                <div class="comment-meta">{{format_date this.created_at}}</div>
-            </div>
-            {{else}}
-            <p class="no-comments">No comments yet. Be the first to comment!</p>
-            {{/each}}
-        </div>
-
-        {{#if pagination}}
-        <div class="pagination">
-            {{#if (gt pagination.current_page 1)}}
-                <a href="/forum/{{../post.id}}?page={{subtract pagination.current_page 1}}" class="pagination-link">&laquo; Previous</a>
-            {{/if}}
-            
-            <span class="pagination-info">
-                Page {{pagination.current_page}} of {{pagination.total_pages}}
-                {{#if pagination.total_items}}
-                ({{pagination.total_items}} comment{{#if (gt pagination.total_items 1)}}s{{/if}})
-                {{/if}}
-            </span>
-            
-            {{#if (lt pagination.current_page pagination.total_pages)}}
-                <a href="/forum/{{../post.id}}?page={{add pagination.current_page 1}}" class="pagination-link">Next &raquo;</a>
-            {{/if}}
-        </div>
-        {{/if}}
-    </div>
-    
-    <div class="post-footer">
-    </div>
-</div>
+  </section>
+</section>
 {{/inline}}
 {{/layout}}

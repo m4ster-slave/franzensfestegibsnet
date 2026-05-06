@@ -1,18 +1,26 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/wiki_style.css">
-{{/header}}
+{{/inline}}
 
 {{#> layout title="Wiki"}}
 {{#*inline "page_content"}}
-<div class="wiki-container">
-  <h1>Wiki</h1>
+<section class="wiki-container dossier-page">
+  <header class="page-intro page-intro--compact">
+    <p class="eyebrow">Archive index</p>
+    <h1>Wiki Files</h1>
+  </header>
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
   <div class="wiki-list">
-    {{#each md_files }}
-    <div class="wiki-item">
-      <a href="/wiki/{{this}}">{{this}}</a>
-    </div>
+    {{#each articles }}
+    <article class="wiki-item">
+      <a href="/wiki/{{this.slug}}">{{this.title}}</a>
+    </article>
+    {{else}}
+    <p>No published articles yet.</p>
     {{/each}}
   </div>
-</div>
+</section>
 {{/inline}}
 {{/layout}}

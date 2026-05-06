@@ -1,14 +1,16 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/article_style.css">
-{{/header}}
+{{/inline}}
 
-{{#> layout title="Wiki"}}
+{{#> layout title=view.article.title}}
 {{#*inline "page_content"}}
-<a href="/wiki/" class="back-button">Back to Wiki</a>
-<div class="article-container">
+<a href="/wiki/" class="back-link">Back to archive</a>
+<article class="article-container dossier-page">
+  <p class="eyebrow">Archive document</p>
+  <h1>{{view.article.title}}</h1>
   <div class="article-content">
-    {{{content}}}
+    {{{view.content_html}}}
   </div>
-</div>
+</article>
 {{/inline}}
 {{/layout}}

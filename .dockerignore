@@ -1,0 +1,7 @@
+target
+.git
+.env
+uploads
+docker-compose*.yml
+articles
+www/node_modules

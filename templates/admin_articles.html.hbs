@@ -1,0 +1,38 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Articles"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+  <div class="admin-header">
+    <h1>Articles</h1>
+    <div class="header-actions">
+      <a href="/admin" class="btn-edit">Dashboard</a>
+      <a href="/admin/articles/new" class="btn-save">New Article</a>
+    </div>
+  </div>
+
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <div class="posts-list">
+    {{#each articles}}
+    <div class="post-card">
+      <div class="post-actions">
+        <a href="/admin/articles/{{this.slug}}/edit" class="btn-edit">Edit</a>
+        <form action="/admin/articles/{{this.slug}}/delete" method="POST">
+          <button type="submit" class="btn-delete">Archive</button>
+        </form>
+      </div>
+      <h2>{{this.title}}</h2>
+      <div class="post-meta">/{{this.slug}} · {{this.status}} · Updated {{format_date this.updated_at}}</div>
+    </div>
+    {{else}}
+    <p>No articles found.</p>
+    {{/each}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}

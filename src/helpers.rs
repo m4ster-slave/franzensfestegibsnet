@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use rocket_dyn_templates::handlebars::{
-    Context, Handlebars, Helper, HelperResult, Output, RenderContext,
+    Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, RenderContext,
+    RenderError, ScopedJson,
 };
 
 pub fn register_helpers(handlebars: &mut Handlebars) {
@@ -13,6 +14,23 @@ pub fn register_helpers(handlebars: &mut Handlebars) {
     handlebars.register_helper("subtract", Box::new(subtract));
     handlebars.register_helper("gt", Box::new(gt));
     handlebars.register_helper("lt", Box::new(lt));
+    handlebars.register_helper("eq", Box::new(EqHelper));
+}
+
+struct EqHelper;
+
+impl HelperDef for EqHelper {
+    fn call_inner<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        _: &'reg Handlebars<'reg>,
+        _: &'rc Context,
+        _: &mut RenderContext<'reg, 'rc>,
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+        let left = h.param(0).map(|v| v.value()).unwrap_or(&JsonValue::Null);
+        let right = h.param(1).map(|v| v.value()).unwrap_or(&JsonValue::Null);
+        Ok(ScopedJson::Derived(JsonValue::Bool(left == right)))
+    }
 }
 
 fn format_date(

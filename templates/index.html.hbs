@@ -1,46 +1,36 @@
-{{#> header }}
+{{#*inline "header"}}
 <link rel="stylesheet" href="/css/index_style.css">
-{{/header}}
+{{/inline}}
 
 {{#> layout title="Home"}}
 {{#*inline "page_content"}}
-<div class="header-section">
-  <h1>Welcome to The Truth about Franzensfeste</h1>
-</div>
-
-<div class="container">
-  <div class="main-content">
-    <h1>Facts and Informations</h1>
-    <div class="image-section">
-      <img src="/static/BIG_LIE.webp" alt="Information Visual" class="main-image">
-    </div>
-
-    <div class="content-description">
-      <p>Our site offers verified information and factual analysis about the biggest conspiracy going on in our world today. Join us on our mission
-        to promote accurate knowledge and understanding about Franzensfeste.</p>
-    </div>
-
-    <div class="info-grid">
-      <div class="info-card">
-        <h2>Resources</h2>
-        <img src="/static/resources.webp" alt="Educational Resources" class="card-image">
-        <p>Discover reading materials and other information on our wiki.</p>
-      </div>
-
-      <div class="info-card">
-        <h2>Community</h2>
-        <img src="/static/community.webp" alt="Community Engagement" class="card-image">
-        <p>Connect with others who share an interest in the Franzensfeste Conspiracy.</p>
-      </div>
-    </div>
-
-    <div class="cta-section">
-      <h2>Join Our Mission</h2>
-      <p>Be part of our community dedicated to promoting understanding about whats going on in
-        Franzensfeste.</p>
-      <button class="cta-button" onclick="location.href = '/wiki';">Learn More</button>
+<section class="home-hero">
+  <img src="/static/BIG_LIE.webp" alt="Franzensfeste evidence board" class="home-hero__image">
+  <div class="home-hero__copy">
+    <p class="eyebrow">Declassified fragment</p>
+    <h1>The Franzensfeste Files</h1>
+    <p>Field notes, unstable maps, witness reports, and the official truth nobody asked for.</p>
+    <div class="home-hero__actions">
+      <a href="/wiki" class="btn btn-primary">Open archive</a>
+      <a href="/forum" class="btn btn-secondary">Read reports</a>
     </div>
   </div>
-</div>
+</section>
+
+<section class="case-grid">
+  <article class="case-panel">
+    <p class="eyebrow">Archive</p>
+    <h2>Cross-reference the evidence</h2>
+    <p>Read the compiled wiki articles and trace the pattern through every oddly specific detail.</p>
+    <a href="/wiki">Browse files</a>
+  </article>
+
+  <article class="case-panel">
+    <p class="eyebrow">Forum</p>
+    <h2>Submit field notes</h2>
+    <p>The community board holds sightings, corrections, theories, and the occasional suspicious silence.</p>
+    <a href="/forum">Enter forum</a>
+  </article>
+</section>
 {{/inline}}
 {{/layout}}

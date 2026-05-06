@@ -1,0 +1,48 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Moderate Posts"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+  <div class="admin-header">
+    <h1>Moderate Posts</h1>
+    <a href="/admin" class="btn-edit">Dashboard</a>
+  </div>
+
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <div class="posts-list">
+    {{#each posts}}
+    <div class="post-card">
+      <div class="post-actions">
+        <a href="/admin/posts/{{this.id}}/edit" class="btn-edit">Edit</a>
+        {{#if this.locked}}
+        <form action="/admin/posts/{{this.id}}/unlock" method="POST"><button type="submit" class="btn-save">Unlock</button></form>
+        {{else}}
+        <form action="/admin/posts/{{this.id}}/lock" method="POST"><button type="submit" class="btn-delete">Lock</button></form>
+        {{/if}}
+      </div>
+      <h2>{{this.title}}</h2>
+      <div class="post-meta">Status: {{this.status}} · {{format_date this.created_at}}</div>
+      <div class="post-content">{{truncate this.content 280}}</div>
+      <form action="/admin/posts/{{this.id}}/moderate" method="POST" class="moderation-form">
+        <select name="status">
+          <option value="{{this.status}}">{{this.status}}</option>
+          <option value="visible">visible</option>
+          <option value="hidden">hidden</option>
+          <option value="removed">removed</option>
+        </select>
+        <input type="text" name="moderator_note" value="{{this.moderator_note}}" placeholder="Moderator note">
+        <button type="submit" class="btn-save">Apply</button>
+      </form>
+    </div>
+    {{else}}
+    <p>No posts found.</p>
+    {{/each}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}

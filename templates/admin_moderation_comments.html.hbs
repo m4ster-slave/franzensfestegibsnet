@@ -1,0 +1,40 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Moderate Comments"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container">
+  <div class="admin-header">
+    <h1>Moderate Comments</h1>
+    <a href="/admin" class="btn-edit">Dashboard</a>
+  </div>
+
+  {{#if error}}
+    <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <div class="posts-list">
+    {{#each comments}}
+    <div class="post-card">
+      <div class="post-meta">Post #{{this.post_id}} · Status: {{this.status}} · {{format_date this.created_at}}</div>
+      <div class="post-content">{{truncate this.content 280}}</div>
+      <form action="/admin/comments/{{this.id}}/moderate" method="POST" class="moderation-form">
+        <select name="status">
+          <option value="{{this.status}}">{{this.status}}</option>
+          <option value="visible">visible</option>
+          <option value="hidden">hidden</option>
+          <option value="removed">removed</option>
+        </select>
+        <input type="text" name="moderator_note" value="{{this.moderator_note}}" placeholder="Moderator note">
+        <button type="submit" class="btn-save">Apply</button>
+      </form>
+      <a href="/admin/posts/{{this.post_id}}/edit" class="btn-edit">Open Post</a>
+    </div>
+    {{else}}
+    <p>No comments found.</p>
+    {{/each}}
+  </div>
+</div>
+{{/inline}}
+{{/layout}}

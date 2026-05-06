@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Explore real information and factual analysis about the Franzensfeste conspiracy. Join our community to uncover the truth. Dark Secrects from Franzensfeste.">
   <meta name="keywords" content="Franzensfeste, Franzensfeste Fortress, Fortezza, South Tyrol, conspiracy theories, Franzensfeste conspiracy, Brenner Pass, historical fortresses, Tyrolean history, Austrian Empire, hidden truths, military architecture, secret history, South Tyrol fortifications, Franzensfeste secrets">
-
   <meta name="robots" content="index, follow">
 
   <meta property="og:title" content="The Truth About Franzensfeste">
@@ -20,33 +19,66 @@
   <meta name="twitter:description" content="Explore verified information and factual analysis about the Franzensfeste conspiracy. Join our community to uncover the truth.">
   <meta name="twitter:image" content="https://www.franzensfestegibs.net/static/BIG_LIE.webp">
 
-
-
   <link rel="stylesheet" href="/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Tomorrow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>{{title}} - Franzensfeste gibs net</title>
   {{> header}}
 </head>
 
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/wiki">Wiki</a></li>
-        <li><a href="/forum">Forum</a></li>
-      </ul>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a class="site-mark" href="/" aria-label="Franzensfeste gibs net home">
+        <span class="site-mark__stamp">Case 39-F</span>
+        <span class="site-mark__title">Franzensfeste Files</span>
+      </a>
+
+      <div class="site-links">
+        <a href="/">Home</a>
+        <a href="/wiki">Archive</a>
+        <a href="/forum">Forum</a>
+      </div>
+
+      <div class="site-actions">
+        {{#if (eq current_user.role "admin")}}
+        <a class="admin-access" href="/admin" title="Admin panel" aria-label="Admin panel">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 4 6v6c0 5 3.4 8.5 8 9 4.6-.5 8-4 8-9V6l-8-3Zm0 2.2 6 2.3V12c0 3.7-2.3 6.2-6 6.8-3.7-.6-6-3.1-6-6.8V7.5l6-2.3Zm-1 4.3h2v4.2h-2V9.5Zm0 5.7h2V17h-2v-1.8Z" />
+          </svg>
+        </a>
+        {{/if}}
+
+        <details class="account-menu">
+          <summary aria-label="Account menu" title="Account">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12.5c2.5 0 4.5-2 4.5-4.5S14.5 3.5 12 3.5 7.5 5.5 7.5 8s2 4.5 4.5 4.5Zm0 2c-3.6 0-7 1.8-7 4.2V20h14v-1.3c0-2.4-3.4-4.2-7-4.2Z" />
+            </svg>
+          </summary>
+          <div class="account-menu__panel">
+            {{#if current_user}}
+            <div class="account-menu__identity">
+              <span>{{current_user.username}}</span>
+              <small>{{current_user.role}}</small>
+            </div>
+            {{#if (eq current_user.role "admin")}}
+            <a href="/admin">Admin panel</a>
+            {{/if}}
+            <form action="/logout" method="POST">
+              <button type="submit">Logout</button>
+            </form>
+            {{else}}
+            <a href="/login">Login</a>
+            <a href="/register">Create account</a>
+            {{/if}}
+          </div>
+        </details>
+      </div>
     </nav>
   </header>
+
   <main>
     {{> page_content}}
   </main>
-  <script>
-    // Basic JavaScript for interactivity
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('Website loaded');
-    });
-  </script>
 </body>
 
 </html>
