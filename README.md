@@ -12,7 +12,7 @@ ADMIN_USERNAME=admin
 ADMIN_EMAIL=admin@example.local
 ADMIN_PASSWORD=change-me-now
 UPLOAD_DIR=./uploads
-UPLOAD_MAX_BYTES=5242880
+UPLOAD_MAX_BYTES=12582912
 ```
 
 Start Postgres for development:
@@ -26,13 +26,31 @@ The app runs migrations automatically and bootstraps the first admin account if 
 
 ## Docker
 
-Run the full app stack:
+Run the full app stack from the published GitHub Container Registry image:
 
 ```sh
-docker compose up --build
+docker compose pull
+docker compose up -d
 ```
 
 Open `http://localhost:8080`. The default Docker admin is `admin` / `change-me-now`; generate a fresh `ROCKET_SECRET_KEY` and change `ADMIN_PASSWORD` before using it anywhere public.
+
+For a VPS, keep your production values in `.env` next to `docker-compose.yml`:
+
+```env
+ROCKET_SECRET_KEY=replace-with-a-long-random-secret
+ADMIN_PASSWORD=replace-with-a-real-password
+POSTGRES_PASSWORD=replace-with-a-real-db-password
+APP_PORT=8080
+```
+
+Do not set `DATABASE_URL` for the bundled Postgres container; Compose wires the app to the `db` service automatically.
+
+The image is published on every push to `main` as:
+
+```text
+ghcr.io/m4ster-slave/franzensfestegibsnet:latest
+```
 
 ## Import existing Markdown articles
 

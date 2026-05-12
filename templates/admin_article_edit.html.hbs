@@ -15,7 +15,7 @@
     <div class="error-message"><p>{{error}}</p></div>
   {{/if}}
 
-  <form action="{{action}}" method="POST" class="edit-form">
+  <form action="{{action}}" method="POST" class="edit-form" data-upload-on-submit data-upload-target="content">
     <div class="form-group">
       <label for="title">Title</label>
       <input type="text" id="title" name="title" value="{{article.title}}" required>
@@ -41,16 +41,13 @@
       <textarea id="content" name="content" rows="18" required>{{article.content}}</textarea>
     </div>
 
-    <button type="submit" class="btn-primary">Save Article</button>
-  </form>
-
-  <form class="upload-form" data-upload-target="content">
-    <div class="form-group">
-      <label for="article_image">Insert Local Image</label>
-      <input type="file" id="article_image" name="file" accept="image/png,image/jpeg,image/webp,image/gif">
+    <div class="form-group upload-field">
+      <label for="article_image">Attach Image</label>
+      <input type="file" id="article_image" data-upload-image accept="image/png,image/jpeg,image/webp,image/gif">
+      <span class="upload-result" aria-live="polite"></span>
     </div>
-    <button type="submit" class="btn-save">Upload Image</button>
-    <span class="upload-result"></span>
+
+    <button type="submit" class="btn-primary">Save Article</button>
   </form>
 </div>
 {{/inline}}

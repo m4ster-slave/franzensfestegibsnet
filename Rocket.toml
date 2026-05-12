@@ -1,3 +1,8 @@
 [default]
 address = "0.0.0.0"
 port = 8080
+
+[default.limits]
+data-form = "16 MiB"
+file = "16 MiB"
+form = "16 MiB"

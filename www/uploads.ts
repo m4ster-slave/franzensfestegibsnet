@@ -1,4 +1,4 @@
-function insertAtCursor(textarea, value) {
+function insertAtCursor(textarea: HTMLTextAreaElement, value: string) {
   const start = textarea.selectionStart || textarea.value.length;
   const end = textarea.selectionEnd || textarea.value.length;
   textarea.value = `${textarea.value.slice(0, start)}${value}${textarea.value.slice(end)}`;
@@ -7,7 +7,7 @@ function insertAtCursor(textarea, value) {
   textarea.selectionEnd = start + value.length;
 }
 
-function uploadErrorMessage(response) {
+function uploadErrorMessage(response: Response): string {
   if (response.status === 413) {
     return "Image is too large. Try one under 12 MB.";
   }
@@ -19,8 +19,11 @@ function uploadErrorMessage(response) {
   return "Image upload failed.";
 }
 
-export async function uploadSelectedImage(fileInput, result) {
-  if (!fileInput || !fileInput.files || !fileInput.files.length) {
+export async function uploadSelectedImage(
+  fileInput: HTMLInputElement | null,
+  result: HTMLElement | null,
+): Promise<string | null> {
+  if (!fileInput?.files?.length) {
     return null;
   }
 
@@ -43,23 +46,32 @@ export async function uploadSelectedImage(fileInput, result) {
   return data.path;
 }
 
-export function appendImageMarkdown(textarea, path) {
+export function appendImageMarkdown(
+  textarea: HTMLTextAreaElement | null,
+  path: string | null,
+) {
   if (!textarea || !path) return;
   insertAtCursor(textarea, `\n![uploaded image](${path})\n`);
 }
 
 document.querySelectorAll("[data-upload-on-submit]").forEach((form) => {
   form.addEventListener("submit", async (event) => {
-    if (form.dataset.uploadComplete === "true") {
+    const htmlForm = form as HTMLFormElement;
+
+    if (htmlForm.dataset.uploadComplete === "true") {
       return;
     }
 
-    const targetId = form.getAttribute("data-upload-target");
-    const target = targetId ? document.getElementById(targetId) : null;
-    const result = form.querySelector(".upload-result");
-    const fileInput = form.querySelector("[data-upload-image]");
+    const targetId = htmlForm.getAttribute("data-upload-target");
+    const target = targetId
+      ? (document.getElementById(targetId) as HTMLTextAreaElement | null)
+      : null;
+    const result = htmlForm.querySelector(".upload-result") as HTMLElement | null;
+    const fileInput = htmlForm.querySelector(
+      "[data-upload-image]",
+    ) as HTMLInputElement | null;
 
-    if (!fileInput || !fileInput.files || !fileInput.files.length) {
+    if (!fileInput?.files?.length) {
       return;
     }
 
@@ -69,10 +81,13 @@ document.querySelectorAll("[data-upload-on-submit]").forEach((form) => {
       const path = await uploadSelectedImage(fileInput, result);
       appendImageMarkdown(target, path);
       fileInput.value = "";
-      form.dataset.uploadComplete = "true";
-      form.requestSubmit();
+      htmlForm.dataset.uploadComplete = "true";
+      htmlForm.requestSubmit();
     } catch (error) {
-      if (result) result.textContent = error.message || "Image upload failed.";
+      if (result) {
+        result.textContent =
+          error instanceof Error ? error.message : "Image upload failed.";
+      }
     }
   });
 });

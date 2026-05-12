@@ -21,7 +21,12 @@
 
   {{#if current_user}}
   <div class="action-strip">
-    <span>Authenticated as {{current_user.username}}</span>
+    <span class="identity-chip">
+      {{#if current_user.avatar_url}}
+      <img class="identity-avatar" src="{{current_user.avatar_url}}" alt="" width="30" height="30" decoding="async">
+      {{/if}}
+      Authenticated as {{current_user.username}}
+    </span>
     <a href="/forum/create" class="btn btn-primary">Open new report</a>
   </div>
   {{else}}
@@ -40,10 +45,19 @@
   <div class="posts-list">
     {{#each posts}}
     <article class="post-card evidence-card">
-      <div class="case-tag">Report #{{this.id}}</div>
-      <h2><a href="/forum/{{this.id}}">{{this.title}}</a></h2>
-      <div class="post-meta">Filed {{format_date this.created_at}}</div>
-      <p class="post-preview">{{truncate this.content 220}}</p>
+      <div class="case-tag">Report #{{this.post.id}}</div>
+      <h2><a href="/forum/{{this.post.id}}">{{this.post.title}}</a></h2>
+      <div class="post-meta">
+        {{#if this.author}}
+        <span class="author-line">
+          {{#if this.author.avatar_url}}<img class="identity-avatar" src="{{this.author.avatar_url}}" alt="" width="30" height="30" loading="lazy" decoding="async">{{/if}}
+          {{this.author.username}}
+        </span>
+        ·
+        {{/if}}
+        Filed {{format_date this.post.created_at}}
+      </div>
+      <p class="post-preview">{{truncate this.post.content 220}}</p>
     </article>
     {{else}}
     <div class="empty-state">

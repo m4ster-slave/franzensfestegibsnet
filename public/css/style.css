@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Special+Elite&family=Tomorrow:wght@400;500;600;700&display=swap");
-
 :root {
   --bg: #090907;
   --bg-2: #11100d;
@@ -22,6 +20,7 @@
 
 html {
   min-height: 100%;
+  text-size-adjust: 100%;
   background: var(--bg);
 }
 
@@ -146,6 +145,9 @@ main {
 .account-menu summary {
   width: 42px;
   height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
@@ -153,6 +155,8 @@ main {
   color: var(--paper);
   background: rgba(32, 29, 23, 0.72);
   cursor: pointer;
+  overflow: hidden;
+  padding: 0;
 }
 
 .admin-access:hover,
@@ -166,6 +170,36 @@ main {
   width: 21px;
   height: 21px;
   fill: currentColor;
+}
+
+.nav-avatar,
+.identity-avatar {
+  width: 42px;
+  height: 42px;
+  max-width: none;
+  aspect-ratio: 1;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.identity-avatar {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-strong);
+}
+
+.identity-chip,
+.author-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.author-line {
+  color: var(--paper);
+  font-weight: 700;
 }
 
 .account-menu {
@@ -219,8 +253,21 @@ main {
 }
 
 .account-menu__identity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: center;
   padding: 0.65rem 0.7rem;
   border-bottom: 1px solid var(--line);
+}
+
+.account-menu__avatar {
+  width: 42px;
+  height: 42px;
+  grid-row: span 2;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .account-menu__identity span,
@@ -246,6 +293,8 @@ main {
   border-radius: var(--radius);
   background: rgba(23, 21, 17, 0.88);
   box-shadow: 0 20px 54px var(--shadow);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
 }
 
 .dossier-page::before,
@@ -525,15 +574,34 @@ select:focus {
 }
 
 @media (max-width: 760px) {
+  body {
+    background:
+      linear-gradient(rgba(9, 9, 7, 0.86), rgba(9, 9, 7, 0.95)),
+      var(--bg);
+  }
+
+  body::before {
+    display: none;
+  }
+
   main {
     width: min(100% - 1rem, 1180px);
     padding-top: 1rem;
+  }
+
+  .site-header {
+    backdrop-filter: none;
   }
 
   .site-nav {
     min-height: auto;
     padding: 0.75rem 0;
     grid-template-columns: 1fr auto;
+    gap: 0.65rem;
+  }
+
+  .site-mark__title {
+    font-size: 1rem;
   }
 
   .site-links {
@@ -541,6 +609,13 @@ select:focus {
     order: 3;
     justify-content: flex-start;
     overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: thin;
+  }
+
+  .site-links a {
+    flex: 0 0 auto;
+    padding-inline: 0.65rem;
   }
 
   .auth-prompt {

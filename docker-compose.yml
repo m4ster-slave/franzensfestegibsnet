@@ -1,21 +1,21 @@
 services:
   app:
-    build: .
+    image: ${APP_IMAGE:-ghcr.io/m4ster-slave/franzensfestegibsnet:latest}
     container_name: franzensfestegibsnet-app
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/franzensfestegibsnet
-      ROCKET_SECRET_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-      ADMIN_USERNAME: admin
-      ADMIN_EMAIL: admin@example.local
-      ADMIN_PASSWORD: change-me-now
-      UPLOAD_DIR: /app/uploads
-      UPLOAD_MAX_BYTES: 5242880
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-franzensfestegibsnet}
+      ROCKET_SECRET_KEY: ${ROCKET_SECRET_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-now}
+      UPLOAD_DIR: ${UPLOAD_DIR:-/app/uploads}
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-12582912}
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     volumes:
       - uploads_data:/app/uploads
 
@@ -24,13 +24,13 @@ services:
     container_name: franzensfestegibsnet-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: franzensfestegibsnet
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-franzensfestegibsnet}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d franzensfestegibsnet"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-franzensfestegibsnet}"]
       interval: 5s
       timeout: 5s
       retries: 10

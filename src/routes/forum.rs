@@ -1,5 +1,5 @@
 use crate::markdown::render_markdown;
-use crate::models::auth::CurrentUser;
+use crate::models::auth::{CurrentUser, User};
 use crate::models::forum::*;
 use rocket::form::Form;
 use rocket::response::Redirect;
@@ -21,14 +21,28 @@ pub async fn forum(
     }
 
     match Post::get_paginated(db.inner(), page, items_per_page).await {
-        Ok((posts, pagination)) => Template::render(
-            "forum",
-            context! {
-                posts: posts,
-                pagination: pagination,
-                current_user: current_user.map(|user| user.0),
-            },
-        ),
+        Ok((posts, pagination)) => {
+            let author_ids: Vec<i32> = posts.iter().filter_map(|post| post.author_id).collect();
+            let authors = User::summaries_by_ids(db.inner(), &author_ids)
+                .await
+                .unwrap_or_default();
+            let posts: Vec<PostListItem> = posts
+                .into_iter()
+                .map(|post| PostListItem {
+                    author: post.author_id.and_then(|id| authors.get(&id).cloned()),
+                    post,
+                })
+                .collect();
+
+            Template::render(
+                "forum",
+                context! {
+                    posts: posts,
+                    pagination: pagination,
+                    current_user: current_user.map(|user| user.0),
+                },
+            )
+        }
         Err(_) => Template::render("forum", context! { error: "Failed to load posts" }),
     }
 }
@@ -53,13 +67,21 @@ pub async fn view_post(
 
     match (post_result, comments_result) {
         (Ok(Some(post)), Ok((comments, pagination))) => {
+            let mut author_ids: Vec<i32> = post.author_id.into_iter().collect();
+            author_ids.extend(comments.iter().filter_map(|comment| comment.author_id));
+            let authors = User::summaries_by_ids(db.inner(), &author_ids)
+                .await
+                .unwrap_or_default();
+
             let rendered_post = RenderedPost {
+                author: post.author_id.and_then(|id| authors.get(&id).cloned()),
                 content_html: render_markdown(&post.content),
                 post,
             };
             let rendered_comments: Vec<RenderedComment> = comments
                 .into_iter()
                 .map(|comment| RenderedComment {
+                    author: comment.author_id.and_then(|id| authors.get(&id).cloned()),
                     content_html: render_markdown(&comment.content),
                     comment,
                 })
@@ -175,7 +197,7 @@ pub async fn create_comment(
     if post.locked {
         return Err(Template::render(
             "forum_post",
-            context! { error: "This post is locked", rendered_post: RenderedPost { content_html: render_markdown(&post.content), post } },
+            context! { error: "This post is locked", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post } },
         ));
     }
 

@@ -15,6 +15,13 @@
     <div class="case-tag">Report #{{rendered_post.post.id}}</div>
     <h1>{{rendered_post.post.title}}</h1>
     <div class="post-meta">
+      {{#if rendered_post.author}}
+      <span class="author-line">
+        {{#if rendered_post.author.avatar_url}}<img class="identity-avatar" src="{{rendered_post.author.avatar_url}}" alt="" width="30" height="30" decoding="async">{{/if}}
+        {{rendered_post.author.username}}
+      </span>
+      ·
+      {{/if}}
       Filed {{format_date rendered_post.post.created_at}}
       {{#if rendered_post.post.locked}} · Locked by moderation{{/if}}
     </div>
@@ -60,7 +67,16 @@
       {{#each comments}}
       <article class="comment">
         <div class="comment-content">{{{this.content_html}}}</div>
-        <div class="comment-meta">{{format_date this.comment.created_at}}</div>
+        <div class="comment-meta">
+          {{#if this.author}}
+          <span class="author-line">
+            {{#if this.author.avatar_url}}<img class="identity-avatar" src="{{this.author.avatar_url}}" alt="" width="30" height="30" loading="lazy" decoding="async">{{/if}}
+            {{this.author.username}}
+          </span>
+          ·
+          {{/if}}
+          {{format_date this.comment.created_at}}
+        </div>
       </article>
       {{else}}
       <p class="empty-state">No notes yet.</p>

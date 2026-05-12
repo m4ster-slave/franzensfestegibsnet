@@ -6,7 +6,10 @@
 {{#*inline "page_content"}}
 <div class="admin-panel-container">
   <div class="admin-header">
-    <h1>Users</h1>
+    <div>
+      <p class="eyebrow">Access registry</p>
+      <h1>Users</h1>
+    </div>
     <a href="/admin" class="btn-edit">Dashboard</a>
   </div>
 
@@ -14,21 +17,29 @@
     <div class="error-message"><p>{{error}}</p></div>
   {{/if}}
 
-  <div class="admin-table">
-    <div class="admin-table-row admin-table-head">
-      <span>User</span>
-      <span>Email</span>
-      <span>Role</span>
-      <span>Status</span>
-      <span>Actions</span>
-    </div>
+  <div class="user-admin-list">
     {{#each users}}
-    <div class="admin-table-row">
-      <span>{{this.username}}</span>
-      <span>{{this.email}}</span>
-      <span>
+    <article class="admin-user-card evidence-card">
+      <div class="admin-user-card__identity">
+        {{#if this.avatar_url}}
+        <img class="admin-user-card__avatar" src="{{this.avatar_url}}" alt="" width="68" height="68" loading="lazy" decoding="async">
+        {{else}}
+        <div class="admin-user-card__avatar admin-user-card__avatar--empty">ID</div>
+        {{/if}}
+        <div>
+          <h2>{{this.username}}</h2>
+          <p>{{this.email}}</p>
+          <div class="admin-user-card__meta">
+            <span class="status-pill">{{this.role}}</span>
+            <span class="status-pill">{{#if this.disabled}}disabled{{else}}active{{/if}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-user-card__controls">
         <form action="/admin/users/{{this.id}}/role" method="POST" class="inline-form">
-          <select name="role">
+          <label for="role-{{this.id}}">Role</label>
+          <select id="role-{{this.id}}" name="role">
             <option value="{{this.role}}">{{this.role}}</option>
             <option value="user">user</option>
             <option value="moderator">moderator</option>
@@ -36,9 +47,13 @@
           </select>
           <button type="submit" class="btn-save">Save</button>
         </form>
-      </span>
-      <span>{{#if this.disabled}}disabled{{else}}active{{/if}}</span>
-      <span>
+
+        <form action="/admin/users/{{this.id}}/password" method="POST" class="inline-form">
+          <label for="password-{{this.id}}">Password</label>
+          <input type="password" id="password-{{this.id}}" name="password" minlength="8" required placeholder="New password">
+          <button type="submit" class="btn-save">Reset</button>
+        </form>
+
         {{#if this.disabled}}
         <form action="/admin/users/{{this.id}}/enable" method="POST" class="inline-form">
           <button type="submit" class="btn-save">Enable</button>
@@ -48,10 +63,12 @@
           <button type="submit" class="btn-delete">Disable</button>
         </form>
         {{/if}}
-      </span>
-    </div>
+      </div>
+    </article>
     {{else}}
-    <p>No users found.</p>
+    <div class="empty-state">
+      <p>No users found.</p>
+    </div>
     {{/each}}
   </div>
 </div>

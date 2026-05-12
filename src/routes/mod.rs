@@ -14,6 +14,7 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::register_post,
         auth::login,
         auth::login_post,
+        auth::profile,
         auth::logout,
         forum::forum,
         forum::create_post,
@@ -27,6 +28,7 @@ pub fn routes() -> Vec<rocket::Route> {
         admin::set_user_role,
         admin::disable_user,
         admin::enable_user,
+        admin::reset_user_password,
         admin::articles_panel,
         admin::new_article,
         admin::create_article,
@@ -46,5 +48,7 @@ pub fn routes() -> Vec<rocket::Route> {
         admin::delete_comment,
         admin::edit_comment,
         uploads::upload_image,
+        uploads::update_profile_avatar,
+        uploads::remove_profile_avatar,
     ]
 }

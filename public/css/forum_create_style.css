@@ -12,15 +12,16 @@
   min-height: 260px;
 }
 
-.upload-form {
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
+.upload-field {
+  padding: 0.85rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: rgba(7, 7, 6, 0.32);
 }
 
 .upload-result {
-  display: inline-block;
-  margin-left: 0.75rem;
+  display: block;
+  min-height: 1.3rem;
   color: var(--green);
 }
 

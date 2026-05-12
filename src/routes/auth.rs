@@ -68,6 +68,18 @@ pub async fn login(current_user: Option<CurrentUser>) -> Result<Template, Redire
     Ok(Template::render("login", context! {}))
 }
 
+#[get("/profile")]
+pub async fn profile(current_user: Option<CurrentUser>) -> Result<Template, Redirect> {
+    let Some(current_user) = current_user else {
+        return Err(Redirect::to("/login"));
+    };
+
+    Ok(Template::render(
+        "profile",
+        context! { current_user: current_user.0 },
+    ))
+}
+
 #[post("/login", data = "<form>")]
 pub async fn login_post(
     db: &State<PgPool>,

@@ -45,6 +45,29 @@
   font-size: 1.35rem;
 }
 
+.post-meta,
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.comment-meta {
+  margin-top: 0.75rem;
+}
+
+.post-meta .identity-avatar,
+.comment-meta .identity-avatar,
+.action-strip .identity-avatar {
+  width: 30px;
+  height: 30px;
+}
+
+.action-strip .identity-chip {
+  color: var(--paper);
+}
+
 .post-preview {
   max-width: 78ch;
   margin: 0.75rem 0 0;

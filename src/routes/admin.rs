@@ -1,6 +1,6 @@
 use crate::markdown::render_markdown;
 use crate::models::article::{Article, ArticleForm};
-use crate::models::auth::{AdminUser, ModeratorUser, RoleForm, User};
+use crate::models::auth::{AdminUser, ModeratorUser, PasswordResetForm, RoleForm, User};
 use crate::models::forum::{
     Comment, EditComment, EditPost, ModerateContent, Post, RenderedComment, RenderedPost,
 };
@@ -101,6 +101,18 @@ pub async fn disable_user(db: &State<PgPool>, id: i32, _admin: AdminUser) -> Red
 #[post("/admin/users/<id>/enable")]
 pub async fn enable_user(db: &State<PgPool>, id: i32, _admin: AdminUser) -> Redirect {
     let _ = User::set_disabled(db.inner(), id, false).await;
+    Redirect::to(uri!(users_panel))
+}
+
+#[post("/admin/users/<id>/password", data = "<form>")]
+pub async fn reset_user_password(
+    db: &State<PgPool>,
+    id: i32,
+    form: Form<PasswordResetForm>,
+    _admin: AdminUser,
+) -> Redirect {
+    let form = form.into_inner();
+    let _ = User::set_password(db.inner(), id, &form.password).await;
     Redirect::to(uri!(users_panel))
 }
 
@@ -289,12 +301,14 @@ pub async fn edit_post_panel(
     match (post_result, comments_result) {
         (Ok(post), Ok(comments)) => {
             let rendered_post = RenderedPost {
+                author: None,
                 content_html: render_markdown(&post.content),
                 post,
             };
             let rendered_comments: Vec<RenderedComment> = comments
                 .into_iter()
                 .map(|comment| RenderedComment {
+                    author: None,
                     content_html: render_markdown(&comment.content),
                     comment,
                 })

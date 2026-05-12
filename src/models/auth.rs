@@ -9,6 +9,7 @@ use rocket::request::{FromRequest, Outcome, Request};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use sqlx::{FromRow, PgPool};
+use std::collections::HashMap;
 use std::env;
 use uuid::Uuid;
 
@@ -24,8 +25,16 @@ pub struct User {
     pub password_hash: String,
     pub role: String,
     pub disabled: bool,
+    pub avatar_url: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+#[derive(Debug, Clone, Serialize, FromRow)]
+pub struct UserSummary {
+    pub id: i32,
+    pub username: String,
+    pub avatar_url: Option<String>,
 }
 
 #[derive(Debug, FromForm)]
@@ -44,6 +53,11 @@ pub struct LoginForm {
 #[derive(Debug, FromForm)]
 pub struct RoleForm {
     pub role: String,
+}
+
+#[derive(Debug, FromForm)]
+pub struct PasswordResetForm {
+    pub password: String,
 }
 
 #[derive(Debug)]
@@ -118,6 +132,28 @@ impl User {
         .await
     }
 
+    pub async fn summaries_by_ids(
+        pool: &PgPool,
+        ids: &[i32],
+    ) -> Result<HashMap<i32, UserSummary>, sqlx::Error> {
+        if ids.is_empty() {
+            return Ok(HashMap::new());
+        }
+
+        let users = sqlx::query_as::<_, UserSummary>(
+            r#"
+            SELECT id, username, avatar_url
+            FROM users
+            WHERE id = ANY($1)
+            "#,
+        )
+        .bind(ids.to_vec())
+        .fetch_all(pool)
+        .await?;
+
+        Ok(users.into_iter().map(|user| (user.id, user)).collect())
+    }
+
     pub async fn set_role(pool: &PgPool, id: i32, role: &str) -> Result<(), String> {
         validate_role(role)?;
         sqlx::query("UPDATE users SET role = $1 WHERE id = $2")
@@ -132,6 +168,30 @@ impl User {
     pub async fn set_disabled(pool: &PgPool, id: i32, disabled: bool) -> Result<(), sqlx::Error> {
         sqlx::query("UPDATE users SET disabled = $1 WHERE id = $2")
             .bind(disabled)
+            .bind(id)
+            .execute(pool)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn set_password(pool: &PgPool, id: i32, password: &str) -> Result<(), String> {
+        let password_hash = hash_password(password)?;
+        sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
+            .bind(password_hash)
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(|err| err.to_string())?;
+        Ok(())
+    }
+
+    pub async fn set_avatar_url(
+        pool: &PgPool,
+        id: i32,
+        avatar_url: Option<&str>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE users SET avatar_url = $1 WHERE id = $2")
+            .bind(avatar_url)
             .bind(id)
             .execute(pool)
             .await?;

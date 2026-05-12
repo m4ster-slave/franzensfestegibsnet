@@ -1,3 +1,4 @@
+use crate::models::auth::UserSummary;
 use chrono::NaiveDateTime;
 use rocket::form::FromForm;
 use rocket::request::{FromRequest, Outcome, Request};
@@ -38,12 +39,20 @@ pub struct Comment {
 pub struct RenderedPost {
     pub post: Post,
     pub content_html: String,
+    pub author: Option<UserSummary>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct RenderedComment {
     pub comment: Comment,
     pub content_html: String,
+    pub author: Option<UserSummary>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct PostListItem {
+    pub post: Post,
+    pub author: Option<UserSummary>,
 }
 
 #[derive(Debug, Serialize)]

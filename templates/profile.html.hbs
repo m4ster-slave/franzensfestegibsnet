@@ -1,0 +1,49 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+{{/inline}}
+
+{{#> layout title="Profile"}}
+{{#*inline "page_content"}}
+<section class="admin-panel-container profile-panel">
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">Field identity</p>
+      <h1>Profile</h1>
+    </div>
+    <a href="/forum" class="btn-edit">Forum</a>
+  </div>
+
+  <div class="profile-grid">
+    <div class="profile-preview evidence-card">
+      {{#if current_user.avatar_url}}
+      <img class="profile-avatar" src="{{current_user.avatar_url}}" alt="" width="96" height="96" decoding="async">
+      {{else}}
+      <div class="profile-avatar profile-avatar--empty">ID</div>
+      {{/if}}
+      <div>
+        <h2>{{current_user.username}}</h2>
+        <p>{{current_user.email}}</p>
+        <span class="status-pill">{{current_user.role}}</span>
+      </div>
+    </div>
+
+    <div class="profile-tools evidence-card">
+      <h2>Profile picture</h2>
+      <form action="/profile/avatar" method="POST" enctype="multipart/form-data" class="evidence-form">
+        <div class="form-group">
+          <label for="avatar">Upload image</label>
+          <input type="file" id="avatar" name="file" accept="image/png,image/jpeg,image/webp,image/gif" required>
+        </div>
+        <button type="submit" class="btn-save">Update picture</button>
+      </form>
+
+      {{#if current_user.avatar_url}}
+      <form action="/profile/avatar/remove" method="POST" class="inline-form">
+        <button type="submit" class="btn-delete">Remove picture</button>
+      </form>
+      {{/if}}
+    </div>
+  </div>
+</section>
+{{/inline}}
+{{/layout}}

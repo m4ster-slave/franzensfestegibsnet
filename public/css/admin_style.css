@@ -9,8 +9,13 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  padding: 0 0 1.15rem;
   border-bottom: 1px solid var(--line);
+}
+
+.admin-header h1 {
+  margin-bottom: 0;
+  font-size: clamp(2.1rem, 5vw, 4rem);
 }
 
 .admin-nav,
@@ -25,7 +30,18 @@
 }
 
 .admin-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   margin-bottom: 1.5rem;
+}
+
+.admin-nav a {
+  min-height: 72px;
+  justify-content: flex-start;
+  border-color: var(--line);
+  background:
+    linear-gradient(135deg, rgba(201, 154, 69, 0.14), transparent 55%),
+    rgba(12, 11, 9, 0.72);
 }
 
 .dashboard-grid {
@@ -38,6 +54,9 @@
   display: grid;
   gap: 0.25rem;
   padding: 1rem;
+  min-height: 118px;
+  align-content: end;
+  border-color: rgba(111, 93, 53, 0.78);
 }
 
 .dashboard-number {
@@ -69,6 +88,120 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.user-admin-list {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.admin-user-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.admin-user-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.admin-user-card__avatar,
+.profile-avatar {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(7, 7, 6, 0.78);
+}
+
+.admin-user-card__avatar--empty,
+.profile-avatar--empty {
+  display: grid;
+  place-items: center;
+  color: var(--amber);
+  font-family: "Special Elite", serif;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+
+.admin-user-card h2,
+.profile-preview h2,
+.profile-tools h2 {
+  margin: 0 0 0.25rem;
+}
+
+.admin-user-card p,
+.profile-preview p {
+  margin: 0 0 0.65rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-card__meta,
+.admin-user-card__controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-user-card__controls {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.admin-user-card__controls .inline-form {
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(7, 7, 6, 0.34);
+}
+
+.admin-user-card__controls select {
+  min-width: 150px;
+}
+
+.admin-user-card__controls input[type="password"] {
+  min-width: 210px;
+}
+
+.profile-panel {
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 1rem;
+}
+
+.profile-preview,
+.profile-tools {
+  padding: 1rem;
+}
+
+.profile-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+}
+
+.profile-avatar--empty {
+  font-size: 1.95rem;
+}
+
+.profile-tools .inline-form {
+  margin-top: 1rem;
 }
 
 .post-card {
@@ -184,13 +317,16 @@
   text-align: center;
 }
 
-.upload-form {
-  margin-top: 1.2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--line);
+.upload-field {
+  padding: 0.85rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: rgba(7, 7, 6, 0.32);
 }
 
 .upload-result {
+  display: block;
+  min-height: 1.3rem;
   color: var(--green);
 }
 
@@ -204,8 +340,20 @@
   }
 
   .admin-table-row,
-  .moderation-case summary {
+  .moderation-case summary,
+  .admin-user-card,
+  .profile-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-user-card__controls {
+    justify-content: stretch;
+  }
+
+  .admin-user-card__controls .inline-form,
+  .admin-user-card__controls input[type="password"],
+  .admin-user-card__controls select {
+    width: 100%;
   }
 
   .moderation-case__title {

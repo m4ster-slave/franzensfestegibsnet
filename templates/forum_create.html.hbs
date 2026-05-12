@@ -27,17 +27,14 @@
       <textarea id="content" name="content" required placeholder="File your observation. Markdown accepted."></textarea>
     </div>
 
+    <div class="form-group upload-field">
+      <label for="post_image">Attach image</label>
+      <input type="file" id="post_image" data-upload-image accept="image/png,image/jpeg,image/webp,image/gif">
+      <span class="upload-result" aria-live="polite"></span>
+    </div>
+
     <input type="hidden" id="fingerprint" name="fingerprint" value="" />
     <button type="submit" class="btn btn-primary" id="submitButton">Submit report</button>
-  </form>
-
-  <form class="upload-form" data-upload-target="content">
-    <div class="form-group">
-      <label for="post_image">Insert local image</label>
-      <input type="file" id="post_image" name="file" accept="image/png,image/jpeg,image/webp,image/gif">
-    </div>
-    <button type="submit" class="btn btn-secondary">Upload image</button>
-    <span class="upload-result"></span>
   </form>
 
   <div class="form-footer">
