@@ -97,8 +97,9 @@
 
 .admin-user-card {
   display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr);
-  gap: 1rem;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr);
+  gap: 1.25rem;
+  align-items: center;
   padding: 1rem;
 }
 
@@ -150,23 +151,41 @@
 }
 
 .admin-user-card__controls {
-  justify-content: flex-end;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.75fr) minmax(260px, 1fr) auto;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .admin-user-card__controls .inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.65rem;
   padding: 0.7rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(7, 7, 6, 0.34);
 }
 
-.admin-user-card__controls select {
-  min-width: 150px;
+.admin-user-card__controls .inline-form label {
+  grid-column: 1 / -1;
 }
 
+.admin-user-card__controls select,
 .admin-user-card__controls input[type="password"] {
-  min-width: 210px;
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-user-card__status-form {
+  align-content: end;
+}
+
+.admin-user-card__status-form button {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 90px;
 }
 
 .profile-panel {
@@ -347,12 +366,17 @@
   }
 
   .admin-user-card__controls {
-    justify-content: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-card__controls .inline-form {
+    grid-template-columns: 1fr;
   }
 
   .admin-user-card__controls .inline-form,
   .admin-user-card__controls input[type="password"],
-  .admin-user-card__controls select {
+  .admin-user-card__controls select,
+  .admin-user-card__controls button {
     width: 100%;
   }
 

@@ -10,7 +10,7 @@
       <p class="eyebrow">Access registry</p>
       <h1>Users</h1>
     </div>
-    <a href="/admin" class="btn-edit">Dashboard</a>
+    <a href="/admin" class="btn-secondary">Back to Dashboard</a>
   </div>
 
   {{#if error}}
@@ -37,29 +37,28 @@
       </div>
 
       <div class="admin-user-card__controls">
-        <form action="/admin/users/{{this.id}}/role" method="POST" class="inline-form">
+        <form action="/admin/users/{{this.id}}/role" method="POST" class="inline-form admin-user-card__role-form">
           <label for="role-{{this.id}}">Role</label>
           <select id="role-{{this.id}}" name="role">
-            <option value="{{this.role}}">{{this.role}}</option>
-            <option value="user">user</option>
-            <option value="moderator">moderator</option>
-            <option value="admin">admin</option>
+            <option value="user" {{#if (eq this.role "user")}}selected{{/if}}>user</option>
+            <option value="moderator" {{#if (eq this.role "moderator")}}selected{{/if}}>moderator</option>
+            <option value="admin" {{#if (eq this.role "admin")}}selected{{/if}}>admin</option>
           </select>
           <button type="submit" class="btn-save">Save</button>
         </form>
 
-        <form action="/admin/users/{{this.id}}/password" method="POST" class="inline-form">
+        <form action="/admin/users/{{this.id}}/password" method="POST" class="inline-form admin-user-card__password-form">
           <label for="password-{{this.id}}">Password</label>
           <input type="password" id="password-{{this.id}}" name="password" minlength="8" required placeholder="New password">
           <button type="submit" class="btn-save">Reset</button>
         </form>
 
         {{#if this.disabled}}
-        <form action="/admin/users/{{this.id}}/enable" method="POST" class="inline-form">
+        <form action="/admin/users/{{this.id}}/enable" method="POST" class="inline-form admin-user-card__status-form">
           <button type="submit" class="btn-save">Enable</button>
         </form>
         {{else}}
-        <form action="/admin/users/{{this.id}}/disable" method="POST" class="inline-form">
+        <form action="/admin/users/{{this.id}}/disable" method="POST" class="inline-form admin-user-card__status-form">
           <button type="submit" class="btn-delete">Disable</button>
         </form>
         {{/if}}
