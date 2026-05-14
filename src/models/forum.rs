@@ -1,7 +1,6 @@
 use crate::models::auth::UserSummary;
 use chrono::NaiveDateTime;
 use rocket::form::FromForm;
-use rocket::request::{FromRequest, Outcome, Request};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool};
 
@@ -96,42 +95,6 @@ pub struct EditComment {
 pub struct ModerateContent {
     pub status: String,
     pub moderator_note: Option<String>,
-}
-
-pub struct ClientInfo {
-    pub ip: String,
-    pub user_agent: String,
-    pub fingerprint: String,
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for ClientInfo {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let ip = request
-            .client_ip()
-            .map(|ip| ip.to_string())
-            .unwrap_or_else(|| "unknown".to_string());
-
-        let user_agent = request
-            .headers()
-            .get_one("User-Agent")
-            .unwrap_or("unknown")
-            .to_string();
-
-        let fingerprint = request
-            .headers()
-            .get_one("X-Fingerprint")
-            .unwrap_or("")
-            .to_string();
-
-        Outcome::Success(ClientInfo {
-            ip,
-            user_agent,
-            fingerprint,
-        })
-    }
 }
 
 impl Post {
@@ -254,56 +217,6 @@ impl Post {
             .bind(id)
             .execute(pool)
             .await?;
-        Ok(())
-    }
-
-    pub async fn validate_client(pool: &PgPool, client: &ClientInfo) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query_as::<_, FingerprintRecord>(
-            r#"
-            SELECT fingerprint, post_count, last_post_timestamp
-            FROM fingerprint_details
-            WHERE fingerprint = $1 OR (ip_address = $2 AND user_agent = $3)
-            "#,
-        )
-        .bind(&client.fingerprint)
-        .bind(&client.ip)
-        .bind(&client.user_agent)
-        .fetch_optional(pool)
-        .await?;
-
-        if let Some(record) = result {
-            let ten_minutes_ago = chrono::Utc::now().naive_utc() - chrono::Duration::minutes(10);
-
-            if record.last_post_timestamp > ten_minutes_ago {
-                return Ok(false);
-            }
-
-            if record.post_count > 50 {
-                return Ok(false);
-            }
-        }
-
-        Ok(true)
-    }
-
-    pub async fn update_client_info(pool: &PgPool, client: &ClientInfo) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            INSERT INTO fingerprint_details
-                (fingerprint, ip_address, user_agent, last_post_timestamp, post_count)
-            VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1)
-            ON CONFLICT (fingerprint) DO UPDATE
-            SET
-                last_post_timestamp = CURRENT_TIMESTAMP,
-                post_count = fingerprint_details.post_count + 1
-            "#,
-        )
-        .bind(&client.fingerprint)
-        .bind(&client.ip)
-        .bind(&client.user_agent)
-        .execute(pool)
-        .await?;
-
         Ok(())
     }
 }
@@ -446,14 +359,6 @@ impl Pagination {
             total_items,
         }
     }
-}
-
-#[derive(Debug, FromRow)]
-struct FingerprintRecord {
-    #[allow(dead_code)]
-    fingerprint: String,
-    post_count: i32,
-    last_post_timestamp: NaiveDateTime,
 }
 
 pub fn validate_content_status(status: &str) -> Result<(), String> {

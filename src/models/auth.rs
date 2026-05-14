@@ -171,7 +171,22 @@ impl User {
             .bind(id)
             .execute(pool)
             .await?;
+        if disabled {
+            destroy_sessions_for_user(pool, id).await?;
+        }
         Ok(())
+    }
+
+    pub async fn disable_for_moderation(pool: &PgPool, id: i32) -> Result<(), sqlx::Error> {
+        Self::set_disabled(pool, id, true).await
+    }
+
+    pub async fn enable(pool: &PgPool, id: i32) -> Result<(), sqlx::Error> {
+        Self::set_disabled(pool, id, false).await
+    }
+
+    pub async fn disable(pool: &PgPool, id: i32) -> Result<(), sqlx::Error> {
+        Self::set_disabled(pool, id, true).await
     }
 
     pub async fn set_password(pool: &PgPool, id: i32, password: &str) -> Result<(), String> {
@@ -275,6 +290,7 @@ pub async fn create_session(
     let cookie = Cookie::build((SESSION_COOKIE, token))
         .http_only(true)
         .same_site(SameSite::Lax)
+        .secure(secure_cookies())
         .path("/")
         .max_age(rocket::time::Duration::days(SESSION_DAYS))
         .build();
@@ -295,10 +311,24 @@ pub async fn destroy_session(pool: &PgPool, cookies: &CookieJar<'_>) -> Result<(
     Ok(())
 }
 
+pub async fn destroy_sessions_for_user(pool: &PgPool, user_id: i32) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM sessions WHERE user_id = $1")
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
 fn hash_token(token: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(token.as_bytes());
     hex::encode(hasher.finalize())
+}
+
+fn secure_cookies() -> bool {
+    env::var("SECURE_COOKIES")
+        .map(|value| value.eq_ignore_ascii_case("true") || value == "1")
+        .unwrap_or(false)
 }
 
 async fn load_user_from_request(request: &Request<'_>) -> Result<User, Status> {

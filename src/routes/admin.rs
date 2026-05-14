@@ -94,13 +94,13 @@ pub async fn set_user_role(
 
 #[post("/admin/users/<id>/disable")]
 pub async fn disable_user(db: &State<PgPool>, id: i32, _admin: AdminUser) -> Redirect {
-    let _ = User::set_disabled(db.inner(), id, true).await;
+    let _ = User::disable(db.inner(), id).await;
     Redirect::to(uri!(users_panel))
 }
 
 #[post("/admin/users/<id>/enable")]
 pub async fn enable_user(db: &State<PgPool>, id: i32, _admin: AdminUser) -> Redirect {
-    let _ = User::set_disabled(db.inner(), id, false).await;
+    let _ = User::enable(db.inner(), id).await;
     Redirect::to(uri!(users_panel))
 }
 

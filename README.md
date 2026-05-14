@@ -13,6 +13,7 @@ ADMIN_EMAIL=admin@example.local
 ADMIN_PASSWORD=change-me-now
 UPLOAD_DIR=./uploads
 UPLOAD_MAX_BYTES=12582912
+SECURE_COOKIES=false
 ```
 
 Start Postgres for development:
@@ -42,6 +43,7 @@ ROCKET_SECRET_KEY=replace-with-a-long-random-secret
 ADMIN_PASSWORD=replace-with-a-real-password
 POSTGRES_PASSWORD=replace-with-a-real-db-password
 APP_PORT=8080
+SECURE_COOKIES=true
 ```
 
 Do not set `DATABASE_URL` for the bundled Postgres container; Compose wires the app to the `db` service automatically.

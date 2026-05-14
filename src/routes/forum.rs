@@ -1,6 +1,7 @@
 use crate::markdown::render_markdown;
 use crate::models::auth::{CurrentUser, User};
 use crate::models::forum::*;
+use crate::models::security::{check_forum_rate_limit, ForumAction, RateLimitDecision};
 use rocket::form::Form;
 use rocket::response::Redirect;
 use rocket::State;
@@ -105,58 +106,56 @@ pub async fn view_post(
 pub async fn create_post(
     db: &State<PgPool>,
     post: Form<CreatePostFingerprint>,
-    client_info: ClientInfo,
     current_user: Option<CurrentUser>,
 ) -> Result<Redirect, Template> {
     let Some(current_user) = current_user else {
         return Ok(Redirect::to("/login"));
     };
 
-    let post = post.into_inner();
-    let client_info = if client_info.fingerprint.is_empty() && !post.fingerprint.is_empty() {
-        ClientInfo {
-            fingerprint: post.fingerprint.clone(),
-            ..client_info
-        }
-    } else {
-        client_info
-    };
+    let CreatePostFingerprint {
+        title,
+        content,
+        fingerprint: _fingerprint,
+    } = post.into_inner();
+    let user_id = current_user.0.id;
 
-    match Post::validate_client(db.inner(), &client_info).await {
-        Ok(true) => {
-            let create_result = Post::create(
-                db.inner(),
-                CreatePost {
-                    title: post.title,
-                    content: post.content,
+    match check_forum_rate_limit(db.inner(), user_id, ForumAction::Post).await {
+        Ok(RateLimitDecision::Allow) => {}
+        Ok(RateLimitDecision::SlowDown) => {
+            return Err(Template::render(
+                "forum_create",
+                context! {
+                    error: "Too many posts. Please wait before posting again.",
+                    current_user: current_user.0,
                 },
-                current_user.0.id,
-            )
-            .await;
-
-            match create_result {
-                Ok(_) => {
-                    if (Post::update_client_info(db.inner(), &client_info).await).is_err() {
-                        return Err(Template::render(
-                            "forum_create",
-                            context! { error: "Failed to update client info" },
-                        ));
-                    }
-                    Ok(Redirect::to(uri!(forum(page = None::<i64>))))
-                }
-                Err(_) => Err(Template::render(
-                    "forum_create",
-                    context! { error: "Failed to create post" },
-                )),
-            }
+            ));
         }
-        Ok(false) => Err(Template::render(
-            "forum_create",
-            context! { error: "Too many posts. Please wait before posting again." },
-        )),
+        Ok(RateLimitDecision::DisableAccount) => {
+            let _ = User::disable_for_moderation(db.inner(), user_id).await;
+            return Err(Template::render(
+                "forum_create",
+                context! { error: "Account disabled by moderation." },
+            ));
+        }
+        Err(_) => {
+            return Err(Template::render(
+                "forum_create",
+                context! {
+                    error: "Failed to validate post",
+                    current_user: current_user.0,
+                },
+            ));
+        }
+    }
+
+    match Post::create(db.inner(), CreatePost { title, content }, user_id).await {
+        Ok(_) => Ok(Redirect::to(uri!(forum(page = None::<i64>)))),
         Err(_) => Err(Template::render(
             "forum_create",
-            context! { error: "Failed to validate post" },
+            context! {
+                error: "Failed to create post",
+                current_user: current_user.0,
+            },
         )),
     }
 }
@@ -197,8 +196,31 @@ pub async fn create_comment(
     if post.locked {
         return Err(Template::render(
             "forum_post",
-            context! { error: "This post is locked", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post } },
+            context! { error: "This post is locked", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post }, current_user: current_user.0 },
         ));
+    }
+
+    match check_forum_rate_limit(db.inner(), current_user.0.id, ForumAction::Comment).await {
+        Ok(RateLimitDecision::Allow) => {}
+        Ok(RateLimitDecision::SlowDown) => {
+            return Err(Template::render(
+                "forum_post",
+                context! { error: "Too many comments. Please wait before posting again.", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post }, current_user: current_user.0 },
+            ));
+        }
+        Ok(RateLimitDecision::DisableAccount) => {
+            let _ = User::disable_for_moderation(db.inner(), current_user.0.id).await;
+            return Err(Template::render(
+                "forum_post",
+                context! { error: "Account disabled by moderation.", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post } },
+            ));
+        }
+        Err(_) => {
+            return Err(Template::render(
+                "forum_post",
+                context! { error: "Failed to validate comment", rendered_post: RenderedPost { author: None, content_html: render_markdown(&post.content), post }, current_user: current_user.0 },
+            ));
+        }
     }
 
     match Comment::create(db.inner(), post_id, comment.into_inner(), current_user.0.id).await {

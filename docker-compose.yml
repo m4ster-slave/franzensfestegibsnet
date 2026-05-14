@@ -14,6 +14,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-now}
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/uploads}
       UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-12582912}
+      SECURE_COOKIES: ${SECURE_COOKIES:-false}
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes:

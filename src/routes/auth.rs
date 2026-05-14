@@ -1,6 +1,9 @@
 use crate::models::auth::{
     create_session, destroy_session, verify_password, CurrentUser, LoginForm, RegisterForm, User,
 };
+use crate::models::security::{
+    login_is_rate_limited, record_auth_attempt, register_is_rate_limited, ClientIp,
+};
 use rocket::form::Form;
 use rocket::http::CookieJar;
 use rocket::response::Redirect;
@@ -21,11 +24,24 @@ pub async fn register(current_user: Option<CurrentUser>) -> Result<Template, Red
 pub async fn register_post(
     db: &State<PgPool>,
     cookies: &CookieJar<'_>,
+    client_ip: ClientIp,
     form: Form<RegisterForm>,
 ) -> Result<Redirect, Template> {
     let form = form.into_inner();
+    let ip = client_ip.0;
+
+    if register_is_rate_limited(db.inner(), &ip)
+        .await
+        .unwrap_or(true)
+    {
+        return Err(Template::render(
+            "register",
+            context! { error: "Could not create account. Please try again later." },
+        ));
+    }
 
     if form.username.trim().len() < 3 {
+        let _ = record_auth_attempt(db.inner(), "register", &ip, None, false).await;
         return Err(Template::render(
             "register",
             context! { error: "Username must be at least 3 characters" },
@@ -41,12 +57,16 @@ pub async fn register_post(
     )
     .await
     {
-        Ok(user) => user,
+        Ok(user) => {
+            let _ = record_auth_attempt(db.inner(), "register", &ip, None, true).await;
+            user
+        }
         Err(_) => {
+            let _ = record_auth_attempt(db.inner(), "register", &ip, None, false).await;
             return Err(Template::render(
                 "register",
                 context! { error: "Could not create account. The username or email may already be taken." },
-            ))
+            ));
         }
     };
 
@@ -84,20 +104,49 @@ pub async fn profile(current_user: Option<CurrentUser>) -> Result<Template, Redi
 pub async fn login_post(
     db: &State<PgPool>,
     cookies: &CookieJar<'_>,
+    client_ip: ClientIp,
     form: Form<LoginForm>,
 ) -> Result<Redirect, Template> {
     let form = form.into_inner();
+    let ip = client_ip.0;
+
+    if login_is_rate_limited(db.inner(), &ip, &form.username_or_email)
+        .await
+        .unwrap_or(true)
+    {
+        return Err(Template::render(
+            "login",
+            context! { error: "Invalid username, email, or password" },
+        ));
+    }
+
     let user = match User::find_for_login(db.inner(), &form.username_or_email).await {
         Ok(Some(user))
             if !user.disabled && verify_password(&form.password, &user.password_hash) =>
         {
+            let _ = record_auth_attempt(
+                db.inner(),
+                "login",
+                &ip,
+                Some(&form.username_or_email),
+                true,
+            )
+            .await;
             user
         }
         _ => {
+            let _ = record_auth_attempt(
+                db.inner(),
+                "login",
+                &ip,
+                Some(&form.username_or_email),
+                false,
+            )
+            .await;
             return Err(Template::render(
                 "login",
                 context! { error: "Invalid username, email, or password" },
-            ))
+            ));
         }
     };
 
