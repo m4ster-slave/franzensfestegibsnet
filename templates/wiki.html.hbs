@@ -1,26 +1,53 @@
 {{#*inline "header"}}
 <link rel="stylesheet" href="/css/wiki_style.css">
+<link rel="stylesheet" href="/css/article_style.css">
 {{/inline}}
 
-{{#> layout title="Wiki"}}
+{{#> layout title=page_title}}
 {{#*inline "page_content"}}
-<section class="wiki-container dossier-page">
-  <header class="page-intro page-intro--compact">
-    <p class="eyebrow">Archive index</p>
-    <h1>Wiki Files</h1>
-  </header>
+<section class="wiki-container wiki-shell dossier-page">
   {{#if error}}
     <div class="error-message"><p>{{error}}</p></div>
   {{/if}}
-  <div class="wiki-list">
-    {{#each articles }}
-    <article class="wiki-item">
-      <a href="/wiki/{{this.slug}}">{{this.title}}</a>
-    </article>
+
+  <aside class="wiki-sidebar" aria-label="Archive articles">
+    <a href="/wiki" class="wiki-sidebar__home {{#if is_welcome}}is-active{{/if}}">
+      <span class="wiki-sidebar__kicker">Start</span>
+      <span>Welcome</span>
+    </a>
+
+    <div class="wiki-sidebar__section">
+      <p class="eyebrow">Archive index</p>
+      <nav class="wiki-list">
+        {{#each articles }}
+        <a href="/wiki/{{this.slug}}" class="wiki-item {{#if this.active}}is-active{{/if}}">
+          <span class="wiki-item__kicker">File</span>
+          <span>{{this.title}}</span>
+        </a>
+        {{else}}
+        <p class="empty-state">No published articles yet.</p>
+        {{/each}}
+      </nav>
+    </div>
+  </aside>
+
+  <article class="wiki-document">
+    {{#if selected_article}}
+    <p class="eyebrow">Archive document</p>
+    <h1>{{selected_article.article.title}}</h1>
+    <div class="article-content">
+      {{{selected_article.content_html}}}
+    </div>
     {{else}}
-    <p>No published articles yet.</p>
-    {{/each}}
-  </div>
+    <p class="eyebrow">Archive orientation</p>
+    <h1>Welcome to the Franzensfeste Files</h1>
+    <div class="article-content">
+      <p>Hello, investigator. This archive gathers the public notes, reports, and field documents connected to Case 39-F.</p>
+      <br>
+      <p>Some entries are practical guides. Others are fragments, theories, or reports whose conclusions remain disputed. Read carefully, compare sources, and keep an eye on the details that refuse to stay quiet.</p>
+    </div>
+    {{/if}}
+  </article>
 </section>
 {{/inline}}
 {{/layout}}
