@@ -1,0 +1,3 @@
+ALTER TABLE uploads ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}';
+
+CREATE INDEX IF NOT EXISTS idx_uploads_tags ON uploads USING GIN (tags);

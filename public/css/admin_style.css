@@ -349,6 +349,309 @@
   color: var(--green);
 }
 
+.archive-manager {
+  font-family: "Tomorrow", sans-serif;
+}
+
+.archive-manager h1 {
+  font-family: "Special Elite", serif;
+}
+
+.archive-upload {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.archive-dropzone {
+  position: relative;
+  min-height: 96px;
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--paper);
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(111, 125, 86, 0.14), transparent 58%),
+    rgba(7, 7, 6, 0.36);
+  cursor: pointer;
+}
+
+.archive-dropzone--active {
+  border-color: var(--amber);
+  background:
+    linear-gradient(135deg, rgba(201, 154, 69, 0.18), transparent 58%),
+    rgba(7, 7, 6, 0.52);
+}
+
+.archive-dropzone input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.archive-dropzone__title {
+  font-family: "Special Elite", serif;
+  font-size: clamp(1.15rem, 3vw, 1.65rem);
+}
+
+.archive-dropzone__meta {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archive-upload__actions,
+.archive-copy__row,
+.archive-card__forms {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.archive-upload__actions {
+  min-width: 150px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.archive-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+  margin: 0 0 1rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(7, 7, 6, 0.32);
+}
+
+.archive-search,
+.archive-preview-toggle {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.archive-search input {
+  width: 100%;
+}
+
+.archive-view-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.archive-preview-toggle {
+  grid-auto-flow: column;
+  align-items: center;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.archive-control-active {
+  border-color: var(--amber);
+  color: var(--paper);
+  background: rgba(201, 154, 69, 0.16);
+}
+
+.archive-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.archive-view-grid .archive-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.archive-card {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(24, 22, 18, 0.92);
+}
+
+.archive-preview-off .archive-card,
+.archive-view-list.archive-preview-off .archive-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.archive-view-grid .archive-card {
+  grid-template-columns: 1fr;
+  grid-template-rows: 132px 1fr;
+}
+
+.archive-preview {
+  display: grid;
+  place-items: center;
+  width: 116px;
+  min-height: 100%;
+  min-width: 0;
+  background: rgba(7, 7, 6, 0.5);
+  border-right: 1px solid var(--line);
+}
+
+.archive-view-grid .archive-preview {
+  width: 100%;
+  min-height: 132px;
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.archive-preview-off .archive-preview {
+  display: none;
+}
+
+.archive-preview img,
+.archive-preview iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.archive-preview img {
+  object-fit: contain;
+}
+
+.archive-file-icon {
+  width: 58px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--amber);
+  font-family: "Special Elite", serif;
+  letter-spacing: 0.12em;
+  background: rgba(201, 154, 69, 0.08);
+}
+
+.archive-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem;
+}
+
+.archive-view-grid .archive-card__body {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.archive-card h2 {
+  margin: 0 0 0.25rem;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.archive-tags {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.archive-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid rgba(111, 93, 53, 0.72);
+  border-radius: 999px;
+  color: var(--paper);
+  font-size: 0.72rem;
+  background: rgba(201, 154, 69, 0.08);
+}
+
+.archive-tag--empty {
+  color: var(--muted);
+  border-style: dashed;
+  background: transparent;
+}
+
+.archive-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.archive-copy input,
+.archive-rename-form input,
+.archive-tags-form input {
+  min-width: 0;
+}
+
+.archive-copy__row {
+  align-items: stretch;
+}
+
+.archive-copy__row input,
+.archive-rename-form input,
+.archive-tags-form input {
+  flex: 1 1 190px;
+  width: 100%;
+}
+
+.archive-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.archive-details {
+  min-width: 190px;
+}
+
+.archive-details summary {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--paper);
+  cursor: pointer;
+  background: rgba(7, 7, 6, 0.28);
+}
+
+.archive-details[open] {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+}
+
+.archive-card__forms {
+  align-items: end;
+  justify-content: space-between;
+  padding-top: 0.2rem;
+}
+
+.archive-rename-form,
+.archive-tags-form {
+  flex: 1 1 260px;
+}
+
+.archive-delete-form {
+  margin-left: auto;
+}
+
 @media (max-width: 840px) {
   .admin-header,
   .admin-nav,
@@ -382,5 +685,39 @@
 
   .moderation-case__title {
     white-space: normal;
+  }
+
+  .archive-upload,
+  .archive-toolbar,
+  .archive-card,
+  .archive-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-view-grid .archive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-upload__actions,
+  .archive-copy__row,
+  .archive-card__forms,
+  .archive-rename-form,
+  .archive-tags-form,
+  .archive-actions,
+  .archive-view-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .archive-preview {
+    width: 100%;
+    min-height: 132px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .archive-delete-form,
+  .archive-delete-form button {
+    width: 100%;
   }
 }

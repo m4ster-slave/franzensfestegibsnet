@@ -1,0 +1,134 @@
+{{#*inline "header"}}
+<link rel="stylesheet" href="/css/admin_style.css">
+<script type="module" src="/js/admin_archive.js"></script>
+{{/inline}}
+
+{{#> layout title="Archive"}}
+{{#*inline "page_content"}}
+<div class="admin-panel-container archive-manager archive-view-list archive-preview-off" data-archive-manager>
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">Public file vault</p>
+      <h1>Archive</h1>
+    </div>
+    <div class="header-actions">
+      <a href="/admin" class="btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+
+  {{#if error}}
+  <div class="error-message"><p>{{error}}</p></div>
+  {{/if}}
+
+  <form action="/admin/archive/upload" method="POST" enctype="multipart/form-data" class="archive-upload" data-archive-upload>
+    <label class="archive-dropzone" for="archive_files" data-dropzone>
+      <span class="archive-dropzone__title">Drop files here</span>
+      <span class="archive-dropzone__meta">or choose common files up to {{max_upload_mb}} MB each</span>
+      <input type="file" id="archive_files" name="files" multiple data-archive-files>
+    </label>
+    <div class="archive-upload__actions">
+      <span class="upload-result" aria-live="polite" data-archive-file-summary>No files selected.</span>
+      <button type="submit" class="btn-primary">Upload</button>
+    </div>
+  </form>
+
+  <div class="archive-toolbar">
+    <label class="archive-search">
+      <span>Filter</span>
+      <input type="search" placeholder="Name, type, tag..." data-archive-filter>
+    </label>
+    <div class="archive-view-controls" aria-label="Archive view controls">
+      <button type="button" class="btn-secondary" data-archive-layout="list">List</button>
+      <button type="button" class="btn-secondary" data-archive-layout="grid">Cards</button>
+      <label class="archive-preview-toggle">
+        <input type="checkbox" data-archive-preview-toggle>
+        <span>Show previews</span>
+      </label>
+    </div>
+  </div>
+
+  <section class="archive-grid" aria-label="Archive files" data-archive-list>
+    {{#each files}}
+    <article class="archive-card" data-archive-file data-search-text="{{this.upload.original_filename}} {{this.upload.mime_type}} {{this.tags_search}}">
+      <div class="archive-preview">
+        {{#if this.is_image}}
+        <img src="{{this.upload.path}}" alt="{{this.upload.original_filename}}" loading="lazy" decoding="async">
+        {{else}}
+          {{#if this.is_pdf}}
+          <iframe src="{{this.upload.path}}" title="{{this.upload.original_filename}}" loading="lazy"></iframe>
+          {{else}}
+            {{#if this.is_text}}
+            <iframe src="{{this.upload.path}}" title="{{this.upload.original_filename}}" loading="lazy"></iframe>
+            {{else}}
+            <div class="archive-file-icon" aria-hidden="true">FILE</div>
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      </div>
+
+      <div class="archive-card__body">
+        <div class="archive-card__summary">
+          <h2>{{this.upload.original_filename}}</h2>
+          <p class="post-meta">{{this.upload.mime_type}} · {{this.size_label}} · {{format_date this.upload.created_at}}</p>
+          <div class="archive-tags" aria-label="Tags">
+            {{#each this.upload.tags}}
+            <span class="archive-tag">{{this}}</span>
+            {{else}}
+            <span class="archive-tag archive-tag--empty">untagged</span>
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="archive-actions">
+          <button type="button" class="btn-edit" data-copy-value="{{this.markdown}}">Copy Markdown</button>
+          <a class="btn-secondary" href="{{this.upload.path}}" target="_blank" rel="noopener">Open</a>
+        </div>
+
+        <details class="archive-details">
+          <summary>Manage</summary>
+
+          <div class="archive-copy">
+            <label for="archive_markdown_{{this.upload.id}}">Markdown</label>
+            <div class="archive-copy__row">
+              <input id="archive_markdown_{{this.upload.id}}" type="text" value="{{this.markdown}}" readonly>
+              <button type="button" class="btn-edit" data-copy-value="{{this.markdown}}">Copy</button>
+            </div>
+          </div>
+
+          <div class="archive-copy">
+            <label for="archive_url_{{this.upload.id}}">Public URL</label>
+            <div class="archive-copy__row">
+              <input id="archive_url_{{this.upload.id}}" type="text" value="{{this.upload.path}}" readonly>
+              <button type="button" class="btn-edit" data-copy-value="{{this.upload.path}}">Copy</button>
+            </div>
+          </div>
+
+          <div class="archive-copy__row">
+            <form action="/admin/archive/{{this.upload.id}}/tags" method="POST" class="inline-form archive-tags-form">
+              <label for="archive_tags_{{this.upload.id}}">Tags</label>
+              <input id="archive_tags_{{this.upload.id}}" type="text" name="tags" value="{{this.tags_value}}" placeholder="evidence, map, pdf" maxlength="255">
+              <button type="submit" class="btn-save">Save Tags</button>
+            </form>
+          </div>
+
+          <div class="archive-card__forms">
+            <form action="/admin/archive/{{this.upload.id}}/rename" method="POST" class="inline-form archive-rename-form">
+              <label for="archive_name_{{this.upload.id}}">Display name</label>
+              <input id="archive_name_{{this.upload.id}}" type="text" name="original_filename" value="{{this.upload.original_filename}}" maxlength="255" required>
+              <button type="submit" class="btn-save">Rename</button>
+            </form>
+
+            <form action="/admin/archive/{{this.upload.id}}/delete" method="POST" class="archive-delete-form" data-delete-file="{{this.upload.original_filename}}">
+              <button type="submit" class="btn-delete">Delete</button>
+            </form>
+          </div>
+        </details>
+      </div>
+    </article>
+    {{else}}
+    <p class="empty-state">No files have been archived yet.</p>
+    {{/each}}
+  </section>
+</div>
+{{/inline}}
+{{/layout}}

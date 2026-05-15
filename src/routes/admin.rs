@@ -4,13 +4,19 @@ use crate::models::auth::{AdminUser, ModeratorUser, PasswordResetForm, RoleForm,
 use crate::models::forum::{
     Comment, EditComment, EditPost, ModerateContent, Post, RenderedComment, RenderedPost,
 };
-use rocket::form::Form;
+use crate::models::upload::Upload;
+use rocket::form::{Form, FromForm};
+use rocket::fs::TempFile;
+use rocket::http::Status;
 use rocket::response::Redirect;
 use rocket::State;
 use rocket_dyn_templates::{context, Template};
 use serde::Serialize;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use std::env;
+use std::path::{Path, PathBuf};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
 struct AdminStats {
@@ -38,6 +44,33 @@ struct ModerationComment {
     content_html: String,
 }
 
+#[derive(Debug, Serialize)]
+struct ArchiveFile {
+    upload: Upload,
+    markdown: String,
+    size_label: String,
+    tags_value: String,
+    tags_search: String,
+    is_image: bool,
+    is_pdf: bool,
+    is_text: bool,
+}
+
+#[derive(FromForm)]
+pub struct ArchiveUpload<'r> {
+    pub files: Vec<TempFile<'r>>,
+}
+
+#[derive(FromForm)]
+pub struct RenameUploadForm {
+    pub original_filename: String,
+}
+
+#[derive(FromForm)]
+pub struct UpdateUploadTagsForm {
+    pub tags: String,
+}
+
 #[get("/admin")]
 pub async fn admin_panel(db: &State<PgPool>, admin: AdminUser) -> Template {
     let stats = load_stats(db.inner()).await.unwrap_or(AdminStats {
@@ -59,6 +92,93 @@ pub async fn admin_panel(db: &State<PgPool>, admin: AdminUser) -> Template {
             current_user: admin.0,
         },
     )
+}
+
+#[get("/admin/archive")]
+pub async fn archive_panel(db: &State<PgPool>, admin: AdminUser) -> Template {
+    render_archive_panel(db.inner(), admin.0, None).await
+}
+
+#[post("/admin/archive/upload", data = "<form>")]
+pub async fn upload_archive_files(
+    db: &State<PgPool>,
+    mut form: Form<ArchiveUpload<'_>>,
+    admin: AdminUser,
+) -> Result<Redirect, Template> {
+    let admin_user = admin.0;
+    let mut uploaded = 0;
+
+    for file in form.files.iter_mut() {
+        if file.len() == 0 {
+            continue;
+        }
+
+        match persist_archive_upload(db.inner(), admin_user.id, file).await {
+            Ok(()) => uploaded += 1,
+            Err(status) => {
+                return Err(render_archive_panel(
+                    db.inner(),
+                    admin_user,
+                    Some(archive_upload_error(status)),
+                )
+                .await);
+            }
+        }
+    }
+
+    if uploaded == 0 {
+        return Err(render_archive_panel(
+            db.inner(),
+            admin_user,
+            Some("Choose at least one file to upload.".to_string()),
+        )
+        .await);
+    }
+
+    Ok(Redirect::to(uri!(archive_panel)))
+}
+
+#[post("/admin/archive/<id>/rename", data = "<form>")]
+pub async fn rename_archive_file(
+    db: &State<PgPool>,
+    id: i32,
+    form: Form<RenameUploadForm>,
+    _admin: AdminUser,
+) -> Redirect {
+    let filename = sanitize_display_filename(&form.original_filename);
+    let _ = Upload::update_original_filename(db.inner(), id, &filename).await;
+    Redirect::to(uri!(archive_panel))
+}
+
+#[post("/admin/archive/<id>/tags", data = "<form>")]
+pub async fn update_archive_file_tags(
+    db: &State<PgPool>,
+    id: i32,
+    form: Form<UpdateUploadTagsForm>,
+    _admin: AdminUser,
+) -> Redirect {
+    let tags = parse_tags(&form.tags);
+    let _ = Upload::update_tags(db.inner(), id, &tags).await;
+    Redirect::to(uri!(archive_panel))
+}
+
+#[post("/admin/archive/<id>/delete")]
+pub async fn delete_archive_file(db: &State<PgPool>, id: i32, _admin: AdminUser) -> Redirect {
+    if let Ok(Some(upload)) = Upload::find_by_id(db.inner(), id).await {
+        if let Some(path) = upload_disk_path(&upload.path) {
+            if let Err(error) = tokio::fs::remove_file(&path).await {
+                if error.kind() != std::io::ErrorKind::NotFound {
+                    eprintln!(
+                        "Failed to remove archive file '{}': {error}",
+                        path.display()
+                    );
+                }
+            }
+        }
+    }
+
+    let _ = Upload::delete(db.inner(), id).await;
+    Redirect::to(uri!(archive_panel))
 }
 
 #[get("/admin/users")]
@@ -447,4 +567,368 @@ async fn load_stats(pool: &PgPool) -> Result<AdminStats, sqlx::Error> {
 
 async fn count(pool: &PgPool, sql: &str) -> Result<i64, sqlx::Error> {
     sqlx::query_scalar(sql).fetch_one(pool).await
+}
+
+async fn render_archive_panel(pool: &PgPool, admin: User, error: Option<String>) -> Template {
+    match Upload::all_ordered(pool).await {
+        Ok(files) => Template::render(
+            "admin_archive",
+            context! {
+                files: files.into_iter().map(ArchiveFile::from).collect::<Vec<_>>(),
+                current_user: admin,
+                error: error,
+                max_upload_mb: max_upload_bytes() / 1024 / 1024,
+            },
+        ),
+        Err(_) => Template::render(
+            "admin_archive",
+            context! {
+                error: error.unwrap_or_else(|| "Failed to load archive files".to_string()),
+                current_user: admin,
+                max_upload_mb: max_upload_bytes() / 1024 / 1024,
+            },
+        ),
+    }
+}
+
+async fn persist_archive_upload(
+    pool: &PgPool,
+    owner_id: i32,
+    file: &mut TempFile<'_>,
+) -> Result<(), Status> {
+    let allowed = allowed_archive_file(file).ok_or(Status::UnsupportedMediaType)?;
+    let size_bytes = file.len();
+
+    if size_bytes > max_upload_bytes() {
+        return Err(Status::PayloadTooLarge);
+    }
+
+    let upload_dir = env::var("UPLOAD_DIR").unwrap_or_else(|_| "./uploads".to_string());
+    tokio::fs::create_dir_all(&upload_dir)
+        .await
+        .map_err(|_| Status::InternalServerError)?;
+
+    let filename = format!("{}.{}", Uuid::new_v4(), allowed.extension);
+    let mut destination = PathBuf::from(upload_dir);
+    destination.push(&filename);
+
+    file.move_copy_to(&destination).await.map_err(|error| {
+        eprintln!(
+            "Failed to save archive upload to '{}': {error}",
+            destination.display()
+        );
+        Status::InternalServerError
+    })?;
+
+    let public_path = format!("/uploads/{}", filename);
+    Upload::create(
+        pool,
+        owner_id,
+        &public_path,
+        &allowed.original_filename,
+        &allowed.mime_type,
+        size_bytes as i64,
+    )
+    .await
+    .map_err(|error| {
+        eprintln!("Failed to record archive upload '{}': {error}", public_path);
+        Status::InternalServerError
+    })?;
+
+    Ok(())
+}
+
+impl From<Upload> for ArchiveFile {
+    fn from(upload: Upload) -> Self {
+        let label = markdown_label(&upload.original_filename);
+        let is_image = upload.mime_type.starts_with("image/");
+        let is_pdf = upload.mime_type == "application/pdf";
+        let is_text = matches!(
+            upload.mime_type.as_str(),
+            "text/plain" | "text/markdown" | "text/csv" | "application/json"
+        );
+        let markdown = if is_image {
+            format!("![{}]({})", label, upload.path)
+        } else {
+            format!("[{}]({})", label, upload.path)
+        };
+        let tags_value = upload.tags.join(", ");
+        let tags_search = upload.tags.join(" ").to_ascii_lowercase();
+        let size_label = format_size(upload.size_bytes);
+
+        Self {
+            upload,
+            markdown,
+            size_label,
+            tags_value,
+            tags_search,
+            is_image,
+            is_pdf,
+            is_text,
+        }
+    }
+}
+
+struct AllowedArchiveFile {
+    extension: &'static str,
+    mime_type: String,
+    original_filename: String,
+}
+
+fn allowed_archive_file(file: &TempFile<'_>) -> Option<AllowedArchiveFile> {
+    let original_filename = file
+        .raw_name()
+        .map(|name| sanitize_display_filename(name.dangerous_unsafe_unsanitized_raw().as_str()))
+        .unwrap_or_else(|| "archive-file".to_string());
+
+    let extension = Path::new(&original_filename)
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .map(|extension| extension.to_ascii_lowercase());
+    let mime_type = file
+        .content_type()
+        .map(|content_type| content_type.to_string());
+
+    if extension
+        .as_deref()
+        .map(is_blocked_archive_extension)
+        .unwrap_or(false)
+        || mime_type
+            .as_deref()
+            .map(is_blocked_archive_mime)
+            .unwrap_or(false)
+    {
+        return None;
+    }
+
+    if let Some(mime_type) = mime_type.as_deref() {
+        if let Some(extension) = archive_extension_for_mime(mime_type) {
+            return Some(AllowedArchiveFile {
+                extension,
+                mime_type: mime_type.to_string(),
+                original_filename,
+            });
+        }
+    }
+
+    let extension = extension?;
+    archive_mime_for_extension(&extension).map(|mime_type| AllowedArchiveFile {
+        extension: extension_to_static(&extension),
+        mime_type: mime_type.to_string(),
+        original_filename,
+    })
+}
+
+fn sanitize_display_filename(value: &str) -> String {
+    let normalized = value.replace('\\', "/");
+    let filename = normalized
+        .split('/')
+        .filter(|part| !part.is_empty())
+        .next_back()
+        .unwrap_or("archive-file")
+        .trim();
+    let filename = filename
+        .chars()
+        .filter(|character| !character.is_control())
+        .collect::<String>();
+    let filename = filename.trim_matches('.');
+
+    if filename.is_empty() {
+        "archive-file".to_string()
+    } else {
+        filename.chars().take(255).collect()
+    }
+}
+
+fn upload_disk_path(public_path: &str) -> Option<PathBuf> {
+    let filename = public_path.strip_prefix("/uploads/")?;
+
+    if filename.contains('/')
+        || filename.contains('\\')
+        || filename.contains("..")
+        || filename.is_empty()
+    {
+        return None;
+    }
+
+    let upload_dir = env::var("UPLOAD_DIR").unwrap_or_else(|_| "./uploads".to_string());
+    Some(PathBuf::from(upload_dir).join(filename))
+}
+
+fn archive_upload_error(status: Status) -> String {
+    if status.code == Status::PayloadTooLarge.code {
+        format!(
+            "A file is too large. Use files under {} MB.",
+            max_upload_bytes() / 1024 / 1024
+        )
+    } else if status.code == Status::UnsupportedMediaType.code {
+        "Unsupported file type. Use images, PDFs, text/Markdown, CSV, JSON, ZIP, or common office documents.".to_string()
+    } else {
+        "Archive upload failed.".to_string()
+    }
+}
+
+fn format_size(size_bytes: i64) -> String {
+    let size = size_bytes.max(0) as f64;
+    const KB: f64 = 1024.0;
+    const MB: f64 = 1024.0 * 1024.0;
+
+    if size >= MB {
+        format!("{:.1} MB", size / MB)
+    } else if size >= KB {
+        format!("{:.1} KB", size / KB)
+    } else {
+        format!("{} B", size_bytes.max(0))
+    }
+}
+
+fn markdown_label(value: &str) -> String {
+    value.replace('[', "\\[").replace(']', "\\]")
+}
+
+fn parse_tags(value: &str) -> Vec<String> {
+    let mut tags = Vec::new();
+
+    for raw_tag in value.split(',') {
+        let tag = raw_tag
+            .trim()
+            .trim_start_matches('#')
+            .chars()
+            .filter(|character| {
+                character.is_ascii_alphanumeric() || matches!(character, '-' | '_' | ' ')
+            })
+            .collect::<String>()
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join("-");
+        let tag = tag.to_ascii_lowercase();
+
+        if !tag.is_empty() && tag.len() <= 40 && !tags.contains(&tag) {
+            tags.push(tag);
+        }
+    }
+
+    tags
+}
+
+fn max_upload_bytes() -> u64 {
+    env::var("UPLOAD_MAX_BYTES")
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .unwrap_or(12 * 1024 * 1024)
+}
+
+fn archive_extension_for_mime(mime_type: &str) -> Option<&'static str> {
+    match mime_type {
+        "image/png" => Some("png"),
+        "image/jpeg" => Some("jpg"),
+        "image/webp" => Some("webp"),
+        "image/gif" => Some("gif"),
+        "application/pdf" => Some("pdf"),
+        "text/plain" => Some("txt"),
+        "text/markdown" | "text/x-markdown" | "application/markdown" => Some("md"),
+        "text/csv" => Some("csv"),
+        "application/json" => Some("json"),
+        "application/zip" | "application/x-zip-compressed" => Some("zip"),
+        "application/msword" => Some("doc"),
+        "application/vnd.ms-excel" => Some("xls"),
+        "application/vnd.ms-powerpoint" => Some("ppt"),
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => Some("docx"),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => Some("xlsx"),
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation" => Some("pptx"),
+        "application/vnd.oasis.opendocument.text" => Some("odt"),
+        "application/vnd.oasis.opendocument.spreadsheet" => Some("ods"),
+        "application/vnd.oasis.opendocument.presentation" => Some("odp"),
+        _ => None,
+    }
+}
+
+fn archive_mime_for_extension(extension: &str) -> Option<&'static str> {
+    match extension {
+        "png" => Some("image/png"),
+        "jpg" | "jpeg" => Some("image/jpeg"),
+        "webp" => Some("image/webp"),
+        "gif" => Some("image/gif"),
+        "pdf" => Some("application/pdf"),
+        "txt" => Some("text/plain"),
+        "md" | "markdown" => Some("text/markdown"),
+        "csv" => Some("text/csv"),
+        "json" => Some("application/json"),
+        "zip" => Some("application/zip"),
+        "doc" => Some("application/msword"),
+        "xls" => Some("application/vnd.ms-excel"),
+        "ppt" => Some("application/vnd.ms-powerpoint"),
+        "docx" => Some("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+        "xlsx" => Some("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        "pptx" => Some("application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+        "odt" => Some("application/vnd.oasis.opendocument.text"),
+        "ods" => Some("application/vnd.oasis.opendocument.spreadsheet"),
+        "odp" => Some("application/vnd.oasis.opendocument.presentation"),
+        _ => None,
+    }
+}
+
+fn extension_to_static(extension: &str) -> &'static str {
+    match extension {
+        "jpeg" => "jpg",
+        "markdown" => "md",
+        "png" => "png",
+        "jpg" => "jpg",
+        "webp" => "webp",
+        "gif" => "gif",
+        "pdf" => "pdf",
+        "txt" => "txt",
+        "md" => "md",
+        "csv" => "csv",
+        "json" => "json",
+        "zip" => "zip",
+        "doc" => "doc",
+        "xls" => "xls",
+        "ppt" => "ppt",
+        "docx" => "docx",
+        "xlsx" => "xlsx",
+        "pptx" => "pptx",
+        "odt" => "odt",
+        "ods" => "ods",
+        "odp" => "odp",
+        _ => "bin",
+    }
+}
+
+fn is_blocked_archive_extension(extension: &str) -> bool {
+    matches!(
+        extension,
+        "app"
+            | "bat"
+            | "cmd"
+            | "com"
+            | "dll"
+            | "exe"
+            | "html"
+            | "htm"
+            | "jar"
+            | "js"
+            | "mjs"
+            | "php"
+            | "ps1"
+            | "scr"
+            | "sh"
+            | "svg"
+            | "vbs"
+            | "wasm"
+    )
+}
+
+fn is_blocked_archive_mime(mime_type: &str) -> bool {
+    matches!(
+        mime_type,
+        "image/svg+xml"
+            | "text/html"
+            | "application/javascript"
+            | "text/javascript"
+            | "application/x-sh"
+            | "application/x-msdownload"
+            | "application/x-msdos-program"
+            | "application/x-php"
+    )
 }
